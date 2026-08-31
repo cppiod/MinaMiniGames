@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sounds of the Wild - Interactive Animal Sound Directory</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    keyframes: {
+                        pulseRing: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0.8' },
+                            '50%': { transform: 'scale(1.08)', opacity: '0.4' },
+                            '100%': { transform: 'scale(0.95)', opacity: '0.8' },
+                        },
+                        wave: {
+                            '0%, 100%': { height: '6px' },
+                            '50%': { height: '24px' }
+                        }
+                    },
+                    animation: {
+                        'pulse-ring': 'pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'wave-bar-1': 'wave 0.6s infinite ease-in-out',
+                        'wave-bar-2': 'wave 0.8s infinite ease-in-out 0.1s',
+                        'wave-bar-3': 'wave 0.5s infinite ease-in-out 0.2s',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        .btn-gradient-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35);
+        }
+        .btn-gradient-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            box-shadow: 0 6px 20px 0 rgba(37, 99, 235, 0.45);
+        }
+        .btn-gradient-accent {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 4px 14px 0 rgba(245, 158, 11, 0.35);
+        }
+        .btn-gradient-accent:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            box-shadow: 0 6px 20px 0 rgba(245, 158, 11, 0.45);
+        }
+        .card-hover-effect {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover-effect:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(15, 23, 42, 0.12);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white text-2xl shadow-lg shadow-emerald-500/20 transform hover:rotate-6 transition duration-300">
+                    🐾
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+                        Sounds of the Wild
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 uppercase tracking-wider">Interactive</span>
+                    </h1>
+                    <p class="text-xs font-medium text-slate-500">Explore animal sounds & record custom voices</p>
+                </div>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <button onclick="openQuizModal()" class="btn-gradient-accent text-white px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>Sound Quiz Game</span>
+                </button>
+                <button id="surprise-btn" onclick="playRandomSound()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95 border border-slate-200">
+                    <i class="fa-solid fa-dice text-amber-500"></i>
+                    <span>Surprise Me</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- Search & Filter Bar -->
+        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 mb-6 space-y-4">
+            <div class="flex flex-col sm:flex-row gap-3">
+                <!-- Search Input -->
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="search-input" placeholder="Search animal, habitat, or sound..." oninput="handleSearch()"
+                        class="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-sm font-semibold text-slate-800 placeholder-slate-400 transition outline-none">
+                </div>
+                <!-- Reset Filter Button -->
+                <button onclick="resetFilters()" class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                    <span>Reset</span>
+                </button>
+            </div>
+
+            <!-- Category Filter Chips -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar" id="category-chips">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+
+        <!-- Animals Grid Header -->
+        <div class="flex items-center justify-between mb-4">
+            <div class="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                <span>Animals Found:</span>
+                <span id="animal-count-badge" class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-mono">0</span>
+            </div>
+            <div class="text-xs text-slate-400 font-medium">
+                <i class="fa-solid fa-volume-high text-blue-500"></i> Click play to listen
+            </div>
+        </div>
+
+        <!-- Cards Grid Container -->
+        <div id="animals-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+            <!-- Dynamic Animal Cards inserted here -->
+        </div>
+
+        <!-- Empty State (Shown when search returns 0) -->
+        <div id="empty-state" class="hidden text-center py-16 bg-white rounded-3xl border border-slate-200/80 p-8 my-6">
+            <div class="text-5xl mb-3">🔍</div>
+            <h3 class="text-lg font-bold text-slate-800 mb-1">No animals found</h3>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto mb-4">Try adjusting your search query or select another category filter.</p>
+            <button onclick="resetFilters()" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition">Show All Animals</button>
+        </div>
+
+    </main>
+
+    <!-- Voice Studio Recording Modal -->
+    <div id="record-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative animate-in fade-in zoom-in duration-200">
+            <!-- Close Button -->
+            <button onclick="closeRecordModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Modal Header -->
+            <div class="text-center mb-5">
+                <div id="modal-animal-emoji" class="text-5xl mb-2 transform hover:scale-110 transition duration-200">🦁</div>
+                <h3 class="text-xl font-extrabold text-slate-900" id="modal-animal-name">Record Animal Sound</h3>
+                <p class="text-xs text-slate-500 font-medium mt-0.5">Record your imitation and apply hilarious voice FX!</p>
+            </div>
+
+            <!-- Recording Display Box -->
+            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 text-center mb-5">
+                <div id="timer-display" class="text-3xl font-mono font-extrabold text-slate-700 tracking-wider mb-2">00:00</div>
+                <div id="mic-status-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                    <span id="mic-status-text">Microphone Ready</span>
+                </div>
+
+                <!-- Live Preview Player -->
+                <audio id="recording-preview" controls class="w-full mt-4 hidden rounded-lg shadow-inner"></audio>
+
+                <!-- Voice FX Selector -->
+                <div id="voice-fx-container" class="mt-4 hidden text-left border-t border-slate-200/80 pt-3">
+                    <label class="block text-[11px] font-extrabold text-slate-500 uppercase tracking-wider mb-2">Voice FX Filters:</label>
+                    <div class="grid grid-cols-4 gap-1.5">
+                        <button onclick="setVoiceFx('normal')" id="fx-normal" class="fx-btn active-fx text-xs font-bold py-2 rounded-xl bg-blue-600 text-white transition text-center shadow-sm">Normal</button>
+                        <button onclick="setVoiceFx('chipmunk')" id="fx-chipmunk" class="fx-btn text-xs font-bold py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 transition text-center">🐿️ Chipmunk</button>
+                        <button onclick="setVoiceFx('monster')" id="fx-monster" class="fx-btn text-xs font-bold py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 transition text-center">👹 Monster</button>
+                        <button onclick="setVoiceFx('echo')" id="fx-echo" class="fx-btn text-xs font-bold py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 transition text-center">📻 Echo</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-center gap-3">
+                <button id="record-btn" onclick="toggleRecording()" class="w-14 h-14 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white text-xl shadow-lg shadow-rose-500/30 flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                <button id="save-rec-btn" onclick="saveRecording()" disabled class="flex-1 py-3.5 px-4 rounded-2xl bg-slate-200 text-slate-400 font-bold text-xs transition flex items-center justify-center gap-2 cursor-not-allowed">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save to Animal</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Sound Quiz Modal -->
+    <div id="quiz-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative animate-in fade-in zoom-in duration-200">
+            <button onclick="closeQuizModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center mb-4">
+                <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 mb-2 border border-amber-200">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>Score: <span id="quiz-score">0</span></span>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-900">Guess the Animal Sound!</h3>
+                <p class="text-xs text-slate-500 font-medium">Listen closely and pick the matching animal</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 text-center border border-blue-100 mb-5 shadow-inner">
+                <button onclick="playQuizSound()" class="w-16 h-16 rounded-2xl btn-gradient-primary text-white text-2xl shadow-lg transition transform active:scale-95 mx-auto flex items-center justify-center mb-2">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <div class="text-xs font-bold text-blue-700">Tap to Play Sound</div>
+            </div>
+
+            <div id="quiz-options" class="grid grid-cols-2 gap-2.5">
+                <!-- Dynamic quiz options loaded via JS -->
+            </div>
+
+            <div id="quiz-feedback" class="mt-4 text-center text-xs font-extrabold hidden p-3 rounded-2xl transition"></div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl transform translate-y-16 opacity-0 transition-all duration-300 flex items-center gap-2.5 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-circle-info text-emerald-400 text-sm"></i>
+        <span id="toast-msg">Notification message</span>
+    </div>
+
+    <script>
+        // Animal Dataset
+        const animalsData = [
+            { id: 'lion', name: 'Lion', sciName: 'Panthera leo', category: 'Safari', emoji: '🦁', soundDesc: 'Mighty Roar', fact: 'Lions roars can be heard up to 5 miles away!', synthType: 'roar' },
+            { id: 'dog', name: 'Dog', sciName: 'Canis lupus familiaris', category: 'Pets', emoji: '🐶', soundDesc: 'Playful Bark', fact: 'Dogs have a sense of smell 10,000x stronger than humans.', synthType: 'bark' },
+            { id: 'cat', name: 'Cat', sciName: 'Felis catus', category: 'Pets', emoji: '🐱', soundDesc: 'Gentle Meow', fact: 'Cats spend 70% of their lives sleeping.', synthType: 'meow' },
+            { id: 'cow', name: 'Cow', sciName: 'Bos taurus', category: 'Farm', emoji: '🐮', soundDesc: 'Deep Moo', fact: 'Cows have best friends and get stressed when separated.', synthType: 'moo' },
+            { id: 'elephant', name: 'Elephant', sciName: 'Loxodonta africana', category: 'Safari', emoji: '🐘', soundDesc: 'Loud Trumpet', fact: 'Elephants communicate using vibrations felt through their feet.', synthType: 'trumpet' },
+            { id: 'rooster', name: 'Rooster', sciName: 'Gallus gallus domesticus', category: 'Farm', emoji: '🐓', soundDesc: 'Crowing Call', fact: 'Roosters crow to mark their territory at dawn.', synthType: 'chirp' },
+            { id: 'duck', name: 'Duck', sciName: 'Anas platyrhynchos', category: 'Farm', emoji: '🦆', soundDesc: 'Friendly Quack', fact: 'Ducks have waterproof feathers thanks to a special oil gland.', synthType: 'quack' },
+            { id: 'frog', name: 'Frog', sciName: 'Anura', category: 'Amphibians', emoji: '🐸', soundDesc: 'Ribbit Croak', fact: 'Frogs absorb water through their skin instead of drinking it!', synthType: 'ribbit' },
+            { id: 'wolf', name: 'Wolf', sciName: 'Canis lupus', category: 'Wild', emoji: '🐺', soundDesc: 'Haunting Howl', fact: 'Wolves howl to communicate with pack members over vast distances.', synthType: 'howl' },
+            { id: 'owl', name: 'Owl', sciName: 'Strigiformes', category: 'Birds', emoji: '🦉', soundDesc: 'Night Hoot', fact: 'Owls can turn their heads up to 270 degrees.', synthType: 'hoot' },
+            { id: 'bee', name: 'Honey Bee', sciName: 'Apis mellifera', category: 'Insects', emoji: '🐝', soundDesc: 'Busy Buzz', fact: 'Bees perform a dance to tell hive-mates where flowers are.', synthType: 'buzz' },
+            { id: 'snake', name: 'Rattlesnake', sciName: 'Crotalus', category: 'Reptiles', emoji: '🐍', soundDesc: 'Warning Hiss', fact: 'Snakes smell with their tongues instead of nostrils.', synthType: 'hiss' },
+            { id: 'whale', name: 'Blue Whale', sciName: 'Balaenoptera musculus', category: 'Aquatic', emoji: '🐳', soundDesc: 'Deep Ocean Song', fact: 'Blue Whales are the largest creatures ever known to live on Earth.', synthType: 'whalesong' },
+            { id: 'monkey', name: 'Monkey', sciName: 'Simiiformes', category: 'Safari', emoji: '🐒', soundDesc: 'Playful Chatter', fact: 'Monkeys use facial expressions and sounds to talk to each other.', synthType: 'chirp' },
+            { id: 'sheep', name: 'Sheep', sciName: 'Ovis aries', category: 'Farm', emoji: '🐑', soundDesc: 'Gentle Baa', fact: 'Sheep have rectangular pupils giving them 300-degree vision.', synthType: 'moo' },
+            { id: 'horse', name: 'Horse', sciName: 'Equus caballus', category: 'Farm', emoji: '🐴', soundDesc: 'Vibrant Neigh', fact: 'Horses can sleep both standing up and lying down.', synthType: 'trumpet' }
+        ];
+
+        // App Categories
+        const categories = ['All', 'Farm', 'Safari', 'Pets', 'Birds', 'Wild', 'Aquatic', 'Reptiles', 'Insects'];
+
+        // State variables
+        let selectedCategory = 'All';
+        let searchQuery = '';
+        let currentlyPlayingId = null;
+        let recordedAudioUrls = {}; // { animalId: blobUrl }
+        let activeRecordAnimalId = null;
+        
+        // MediaRecorder variables
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let timerInterval = null;
+        let recordingSeconds = 0;
+        let tempRecordedBlob = null;
+        let currentFx = 'normal';
+
+        // IndexedDB database instance
+        let db;
+
+        function initDB() {
+            return new Promise((resolve) => {
+                const request = indexedDB.open("AnimalSoundsDB", 1);
+                request.onupgradeneeded = (e) => {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains("recordings")) {
+                        database.createObjectStore("recordings");
+                    }
+                };
+                request.onsuccess = (e) => {
+                    db = e.target.result;
+                    loadSavedRecordings().then(resolve);
+                };
+                request.onerror = () => resolve();
+            });
+        }
+
+        async function saveRecordingToDB(animalId, blob) {
+            if (!db) return;
+            const transaction = db.transaction(["recordings"], "readwrite");
+            const store = transaction.objectStore("recordings");
+            store.put(blob, animalId);
+        }
+
+        async function loadSavedRecordings() {
+            if (!db) return;
+            return new Promise((resolve) => {
+                const transaction = db.transaction(["recordings"], "readonly");
+                const store = transaction.objectStore("recordings");
+                const request = store.openCursor();
+                request.onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    if (cursor) {
+                        const blob = cursor.value;
+                        recordedAudioUrls[cursor.key] = URL.createObjectURL(blob);
+                        cursor.continue();
+                    } else {
+                        resolve();
+                    }
+                };
+                request.onerror = () => resolve();
+            });
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('category-chips');
+            container.innerHTML = categories.map(cat => {
+                const isActive = selectedCategory === cat;
+                return `
+                    <button onclick="setCategory('${cat}')" 
+                        class="px-4 py-2 rounded-2xl text-xs font-extrabold transition-all whitespace-nowrap active:scale-95 ${
+                            isActive 
+                            ? 'bg-slate-900 text-white shadow-md' 
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }">
+                        ${cat}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function setCategory(cat) {
+            selectedCategory = cat;
+            renderCategories();
+            renderList();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+            renderList();
+        }
+
+        function resetFilters() {
+            selectedCategory = 'All';
+            searchQuery = '';
+            document.getElementById('search-input').value = '';
+            renderCategories();
+            renderList();
+        }
+
+        function renderList() {
+            const grid = document.getElementById('animals-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            const filtered = animalsData.filter(animal => {
+                const matchesCat = selectedCategory === 'All' || animal.category === selectedCategory;
+                const matchesSearch = !searchQuery || 
+                    animal.name.toLowerCase().includes(searchQuery) || 
+                    animal.sciName.toLowerCase().includes(searchQuery) ||
+                    animal.soundDesc.toLowerCase().includes(searchQuery) ||
+                    animal.category.toLowerCase().includes(searchQuery);
+                return matchesCat && matchesSearch;
+            });
+
+            document.getElementById('animal-count-badge').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = filtered.map(animal => {
+                const isPlaying = currentlyPlayingId === animal.id;
+                const hasCustomVoice = !!recordedAudioUrls[animal.id];
+
+                return `
+                    <div class="bg-white rounded-3xl p-5 border border-slate-200/80 card-hover-effect flex flex-col justify-between relative overflow-hidden group">
+                        
+                        <!-- Custom Recording Indicator -->
+                        ${hasCustomVoice ? `
+                            <span class="absolute top-3.5 right-3.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-microphone text-amber-600"></i> Custom
+                            </span>
+                        ` : ''}
+
+                        <div>
+                            <!-- Header Info -->
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="text-4xl p-2.5 bg-slate-50 rounded-2xl group-hover:scale-110 transition duration-300 select-none">
+                                    ${animal.emoji}
+                                </div>
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 text-base leading-tight">${animal.name}</h3>
+                                    <p class="text-[11px] italic font-medium text-slate-400">${animal.sciName}</p>
+                                </div>
+                            </div>
+
+                            <!-- Tags & Description -->
+                            <div class="flex items-center gap-1.5 flex-wrap mb-4">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                                    ${animal.category}
+                                </span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700">
+                                    <i class="fa-solid fa-music mr-1 text-[9px]"></i>${animal.soundDesc}
+                                </span>
+                            </div>
+
+                            <!-- Fun Fact Accordion / Callout -->
+                            <p class="text-xs text-slate-500 bg-slate-50 rounded-2xl p-3 border border-slate-100 leading-relaxed mb-4">
+                                <span class="font-bold text-slate-700">Did you know?</span> ${animal.fact}
+                            </p>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+                            <!-- Play Sound Button -->
+                            <button onclick="playAnimalSound('${animal.id}')" 
+                                class="flex-1 py-2.5 px-3 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95 ${
+                                    isPlaying 
+                                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-500/50' 
+                                    : 'btn-gradient-primary text-white'
+                                }">
+                                ${isPlaying ? `
+                                    <div class="flex items-center gap-1 h-4">
+                                        <span class="w-1 bg-white animate-wave-bar-1"></span>
+                                        <span class="w-1 bg-white animate-wave-bar-2"></span>
+                                        <span class="w-1 bg-white animate-wave-bar-3"></span>
+                                    </div>
+                                    <span>Playing...</span>
+                                ` : `
+                                    <i class="fa-solid fa-circle-play text-sm"></i>
+                                    <span>${hasCustomVoice ? 'Play Custom' : 'Play Sound'}</span>
+                                `}
+                            </button>
+
+                            <!-- Record Custom Studio Button -->
+                            <button onclick="openRecordModal('${animal.id}')" title="Record Custom Sound"
+                                class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition active:scale-95 border border-slate-200 flex items-center justify-center">
+                                <i class="fa-solid fa-microphone text-rose-500 text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function fallbackToSynthesis(animal) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const now = ctx.currentTime;
+
+                const createNoiseBuffer = () => {
+                    const bufferSize = ctx.sampleRate * 1.5;
+                    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                    const output = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        output[i] = Math.random() * 2 - 1;
+                    }
+                    return buffer;
+                };
+
+                const type = animal.synthType || 'chirp';
+
+                if (type === 'moo') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(130, now);
+                    osc.frequency.exponentialRampToValueAtTime(95, now + 1.2);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 1.2);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 1.2);
+                } else if (type === 'bark') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(110, now + 0.25);
+                    gain.gain.setValueAtTime(0.5, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.25);
+                } else if (type === 'meow') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(500, now);
+                    osc.frequency.exponentialRampToValueAtTime(750, now + 0.3);
+                    osc.frequency.exponentialRampToValueAtTime(350, now + 0.7);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.7);
+                } else if (type === 'roar') {
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = createNoiseBuffer();
+                    const filter = ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(250, now);
+                    filter.frequency.exponentialRampToValueAtTime(800, now + 0.5);
+                    filter.frequency.exponentialRampToValueAtTime(150, now + 1.4);
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0.6, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 1.4);
+                    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+                    noise.start(now); noise.stop(now + 1.4);
+                } else if (type === 'trumpet') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(580, now + 0.4);
+                    osc.frequency.exponentialRampToValueAtTime(420, now + 1.0);
+                    gain.gain.setValueAtTime(0.5, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 1.0);
+                } else if (type === 'howl') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(650, now + 0.6);
+                    osc.frequency.exponentialRampToValueAtTime(380, now + 1.6);
+                    gain.gain.setValueAtTime(0.35, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 1.6);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 1.6);
+                } else if (type === 'quack') {
+                    const osc = ctx.createOscillator();
+                    const filter = ctx.createBiquadFilter();
+                    const gain = ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.35);
+                    filter.type = 'bandpass';
+                    filter.frequency.setValueAtTime(750, now);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.35);
+                } else if (type === 'ribbit') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(160, now);
+                    osc.frequency.exponentialRampToValueAtTime(90, now + 0.3);
+                    gain.gain.setValueAtTime(0.5, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.3);
+                } else if (type === 'hiss') {
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = createNoiseBuffer();
+                    const filter = ctx.createBiquadFilter();
+                    filter.type = 'highpass';
+                    filter.frequency.setValueAtTime(3000, now);
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+                    noise.start(now); noise.stop(now + 0.8);
+                } else if (type === 'buzz') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(190, now);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.7);
+                } else if (type === 'hoot') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(340, now);
+                    osc.frequency.exponentialRampToValueAtTime(260, now + 0.5);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.5);
+                } else if (type === 'whalesong') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(160, now);
+                    osc.frequency.exponentialRampToValueAtTime(380, now + 0.8);
+                    osc.frequency.exponentialRampToValueAtTime(120, now + 1.8);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 1.8);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 1.8);
+                } else {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1200, now);
+                    osc.frequency.exponentialRampToValueAtTime(2400, now + 0.15);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.35);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.35);
+                }
+            } catch (err) {
+                console.warn("Synthesis fallback failed:", err);
+            }
+        }
+
+        let currentAudio = null;
+
+        function playAnimalSound(animalId) {
+            const animal = animalsData.find(a => a.id === animalId);
+            if (!animal) return;
+
+            // Stop any playing sound
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+
+            currentlyPlayingId = animalId;
+            renderList();
+
+            // Check if user recorded a custom voice for this animal
+            if (recordedAudioUrls[animalId]) {
+                currentAudio = new Audio(recordedAudioUrls[animalId]);
+                currentAudio.play().then(() => {
+                    showToast(`Playing custom recorded voice for ${animal.name}! 🎙️`);
+                }).catch(() => fallbackToSynthesis(animal));
+
+                currentAudio.onended = () => {
+                    currentlyPlayingId = null;
+                    renderList();
+                };
+            } else {
+                // Play synthesized procedural audio effect
+                fallbackToSynthesis(animal);
+                setTimeout(() => {
+                    currentlyPlayingId = null;
+                    renderList();
+                }, 1200);
+            }
+        }
+
+        function playRandomSound() {
+            const randomAnimal = animalsData[Math.floor(Math.random() * animalsData.length)];
+            playAnimalSound(randomAnimal.id);
+            showToast(`Surprise! Playing ${randomAnimal.name} sound ${randomAnimal.emoji}`);
+        }
+
+        function openRecordModal(animalId) {
+            activeRecordAnimalId = animalId;
+            const animal = animalsData.find(a => a.id === animalId);
+            
+            document.getElementById('modal-animal-emoji').textContent = animal.emoji;
+            document.getElementById('modal-animal-name').textContent = `Record ${animal.name} Voice`;
+            document.getElementById('record-modal').classList.remove('hidden');
+            
+            resetRecordingState();
+        }
+
+        function closeRecordModal() {
+            if (isRecording) {
+                stopRecording();
+            }
+            document.getElementById('record-modal').classList.add('hidden');
+            activeRecordAnimalId = null;
+        }
+
+        function resetRecordingState() {
+            recordingSeconds = 0;
+            tempRecordedBlob = null;
+            document.getElementById('timer-display').textContent = '00:00';
+            document.getElementById('save-rec-btn').disabled = true;
+            document.getElementById('save-rec-btn').className = "flex-1 py-3.5 px-4 rounded-2xl bg-slate-200 text-slate-400 font-bold text-xs transition flex items-center justify-center gap-2 cursor-not-allowed";
+            document.getElementById('recording-preview').classList.add('hidden');
+            document.getElementById('voice-fx-container').classList.add('hidden');
+            document.getElementById('mic-status-badge').className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700";
+            document.getElementById('mic-status-text').textContent = "Microphone Ready";
+            setVoiceFx('normal');
+        }
+
+        async function toggleRecording() {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    tempRecordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(tempRecordedBlob);
+                    
+                    const preview = document.getElementById('recording-preview');
+                    preview.src = audioUrl;
+                    preview.classList.remove('hidden');
+
+                    document.getElementById('voice-fx-container').classList.remove('hidden');
+                    document.getElementById('save-rec-btn').disabled = false;
+                    document.getElementById('save-rec-btn').className = "flex-1 py-3.5 px-4 rounded-2xl btn-gradient-primary text-white font-bold text-xs transition active:scale-95 shadow-md flex items-center justify-center gap-2";
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+
+                // UI Updates
+                document.getElementById('record-btn').className = "w-14 h-14 rounded-2xl bg-slate-900 text-white text-xl shadow-lg flex items-center justify-center transition active:scale-95 animate-pulse-ring";
+                document.getElementById('record-btn').innerHTML = '<i class="fa-solid fa-square text-rose-500"></i>';
+                
+                document.getElementById('mic-status-badge').className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200";
+                document.getElementById('mic-status-text').textContent = "Recording Live...";
+
+                // Timer
+                recordingSeconds = 0;
+                timerInterval = setInterval(() => {
+                    recordingSeconds++;
+                    const mins = String(Math.floor(recordingSeconds / 60)).padStart(2, '0');
+                    const secs = String(recordingSeconds % 60).padStart(2, '0');
+                    document.getElementById('timer-display').textContent = `${mins}:${secs}`;
+                }, 1000);
+
+            } catch (err) {
+                showToast("Microphone access denied or not supported in browser.");
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                clearInterval(timerInterval);
+
+                document.getElementById('record-btn').className = "w-14 h-14 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white text-xl shadow-lg flex items-center justify-center transition active:scale-95";
+                document.getElementById('record-btn').innerHTML = '<i class="fa-solid fa-microphone"></i>';
+                
+                document.getElementById('mic-status-badge').className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200";
+                document.getElementById('mic-status-text').textContent = "Recording Complete!";
+            }
+        }
+
+        function setVoiceFx(fx) {
+            currentFx = fx;
+            document.querySelectorAll('.fx-btn').forEach(btn => {
+                btn.className = "fx-btn text-xs font-bold py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 transition text-center";
+            });
+            const activeBtn = document.getElementById(`fx-${fx}`);
+            if (activeBtn) {
+                activeBtn.className = "fx-btn active-fx text-xs font-bold py-2 rounded-xl bg-blue-600 text-white transition text-center shadow-sm";
+            }
+        }
+
+        async function saveRecording() {
+            if (!tempRecordedBlob || !activeRecordAnimalId) return;
+
+            let finalBlob = tempRecordedBlob;
+
+            if (currentFx !== 'normal') {
+                try {
+                    finalBlob = await applyAudioFx(tempRecordedBlob, currentFx);
+                } catch (e) {
+                    console.warn("Audio FX fallback:", e);
+                }
+            }
+
+            const audioUrl = URL.createObjectURL(finalBlob);
+            recordedAudioUrls[activeRecordAnimalId] = audioUrl;
+
+            await saveRecordingToDB(activeRecordAnimalId, finalBlob);
+
+            const animal = animalsData.find(a => a.id === activeRecordAnimalId);
+            showToast(`Saved custom voice for ${animal.name}! 🎙️`);
+
+            closeRecordModal();
+            renderList();
+        }
+
+        async function applyAudioFx(blob, fx) {
+            const arrayBuffer = await blob.arrayBuffer();
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+
+            let rate = 1.0;
+            if (fx === 'chipmunk') rate = 1.6;
+            if (fx === 'monster') rate = 0.65;
+
+            const offlineCtx = new OfflineAudioContext(
+                audioBuffer.numberOfChannels,
+                Math.max(1, audioBuffer.duration * ctx.sampleRate / rate),
+                ctx.sampleRate
+            );
+
+            const source = offlineCtx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.playbackRate.value = rate;
+
+            if (fx === 'echo') {
+                const delay = offlineCtx.createDelay();
+                delay.delayTime.value = 0.25;
+                const feedback = offlineCtx.createGain();
+                feedback.gain.value = 0.4;
+                source.connect(delay);
+                delay.connect(feedback);
+                feedback.connect(delay);
+                delay.connect(offlineCtx.destination);
+            }
+
+            source.connect(offlineCtx.destination);
+            source.start(0);
+
+            const renderedBuffer = await offlineCtx.startRendering();
+            return audioBufferToWavBlob(renderedBuffer);
+        }
+
+        function audioBufferToWavBlob(buffer) {
+            const numOfChan = buffer.numberOfChannels;
+            const length = buffer.length * numOfChan * 2 + 44;
+            const out = new DataView(new ArrayBuffer(length));
+            let channels = [], sample, offset = 0, pos = 0;
+
+            function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
+            function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
+
+            setUint32(0x46464952); // "RIFF"
+            setUint32(length - 8);
+            setUint32(0x45564157); // "WAVE"
+            setUint32(0x20746d66); // "fmt "
+            setUint32(16);
+            setUint16(1); // PCM
+            setUint16(numOfChan);
+            setUint32(buffer.sampleRate);
+            setUint32(buffer.sampleRate * 2 * numOfChan);
+            setUint16(numOfChan * 2);
+            setUint16(16);
+            setUint32(0x61746164); // "data"
+            setUint32(length - pos - 4);
+
+            for (let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+
+            while (offset < buffer.length) {
+                for (let i = 0; i < numOfChan; i++) {
+                    sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    out.setInt16(pos, sample, true);
+                    pos += 2;
+                }
+                offset++;
+            }
+            return new Blob([out], { type: "audio/wav" });
+        }
+
+        let quizCurrentAnimal = null;
+        let quizScore = 0;
+
+        function openQuizModal() {
+            document.getElementById('quiz-modal').classList.remove('hidden');
+            generateQuizQuestion();
+        }
+
+        function closeQuizModal() {
+            document.getElementById('quiz-modal').classList.add('hidden');
+        }
+
+        function generateQuizQuestion() {
+            const feedbackEl = document.getElementById('quiz-feedback');
+            feedbackEl.classList.add('hidden');
+
+            quizCurrentAnimal = animalsData[Math.floor(Math.random() * animalsData.length)];
+
+            const distractors = animalsData.filter(a => a.id !== quizCurrentAnimal.id);
+            distractors.sort(() => 0.5 - Math.random());
+            const options = [quizCurrentAnimal, ...distractors.slice(0, 3)];
+            options.sort(() => 0.5 - Math.random());
+
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = options.map(opt => `
+                <button onclick="handleQuizAnswer('${opt.id}')" 
+                    class="p-3.5 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 transition text-center flex flex-col items-center gap-1.5 active:scale-95 shadow-sm">
+                    <span class="text-3xl select-none">${opt.emoji}</span>
+                    <span class="text-xs font-extrabold text-slate-800">${opt.name}</span>
+                </button>
+            `).join('');
+
+            playQuizSound();
+        }
+
+        function playQuizSound() {
+            if (quizCurrentAnimal) {
+                playAnimalSound(quizCurrentAnimal.id);
+            }
+        }
+
+        function handleQuizAnswer(selectedId) {
+            const feedbackEl = document.getElementById('quiz-feedback');
+            feedbackEl.classList.remove('hidden');
+
+            if (selectedId === quizCurrentAnimal.id) {
+                quizScore += 10;
+                document.getElementById('quiz-score').textContent = quizScore;
+                feedbackEl.className = "mt-4 text-center text-xs font-extrabold p-3 rounded-2xl bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm";
+                feedbackEl.innerHTML = `🎉 Correct! That was the ${quizCurrentAnimal.name}! (+10 pts)`;
+                setTimeout(() => generateQuizQuestion(), 1400);
+            } else {
+                feedbackEl.className = "mt-4 text-center text-xs font-extrabold p-3 rounded-2xl bg-rose-100 text-rose-800 border border-rose-200 shadow-sm";
+                feedbackEl.innerHTML = `❌ Oops! That wasn't it. Listen again!`;
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = message;
+            toast.classList.remove('translate-y-16', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-16', 'opacity-0');
+            }, 3000);
+        }
+
+        window.onload = async function() {
+            await initDB();
+            renderCategories();
+            renderList();
+        };
+    </script>
+</body>
+</html>
