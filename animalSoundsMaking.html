@@ -71,60 +71,113 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-2.5 flex-wrap">
-                <button onclick="openQuizModal()" class="btn-gradient-accent text-white px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95">
-                    <i class="fa-solid fa-trophy"></i>
-                    <span>Sound Quiz Game</span>
-                </button>
-                <button id="surprise-btn" onclick="playRandomSound()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95 border border-slate-200">
-                    <i class="fa-solid fa-dice text-amber-500"></i>
-                    <span>Surprise Me</span>
-                </button>
-            </div>
+            <!-- Recorded Only Toggle -->
+            <label class="flex items-center gap-2.5 cursor-pointer">
+                <input type="checkbox" id="recorded-only-toggle" onchange="handleRecordedOnlyFilter()" 
+                    class="w-5 h-5 rounded-lg border-2 border-slate-300 checked:bg-emerald-500 checked:border-emerald-500 cursor-pointer accent-emerald-500">
+                <span class="text-xs font-bold text-slate-700">Recorded Only</span>
+            </label>
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-        <!-- Search & Filter Controls -->
-        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 mb-6 space-y-4">
-            <div class="flex flex-col sm:flex-row gap-3">
-                <div class="relative flex-1">
-                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input type="text" id="search-input" placeholder="Search 114 animals, habitats, or sound effects..." oninput="handleSearch()"
-                        class="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-sm font-semibold text-slate-800 placeholder-slate-400 transition outline-none">
-                </div>
-                <button onclick="resetFilters()" class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center gap-2 transition">
+    <main class="flex-1 flex">
+        <!-- Left Sidebar -->
+        <aside class="w-64 bg-white border-r border-slate-200/80 overflow-y-auto p-5 space-y-6 hidden md:block">
+            <!-- Sidebar Header -->
+            <div class="space-y-3">
+                <h2 class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Filters & Controls</h2>
+                <button onclick="resetFilters()" class="w-full px-3 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center gap-2 transition border border-slate-200">
                     <i class="fa-solid fa-arrow-rotate-left"></i>
-                    <span>Reset</span>
+                    <span>Reset All</span>
                 </button>
             </div>
 
-            <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar" id="category-chips"></div>
-        </div>
-
-        <!-- Grid Status Header -->
-        <div class="flex items-center justify-between mb-4">
-            <div class="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                <span>Animals Count:</span>
-                <span id="animal-count-badge" class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-mono">0</span>
+            <!-- Recorded Only Toggle -->
+            <div class="space-y-2.5 pb-4 border-b border-slate-200/80">
+                <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Recording Status</h3>
+                <label class="flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition">
+                    <input type="checkbox" id="recorded-only-toggle" onchange="handleRecordedOnlyFilter()" 
+                        class="w-4 h-4 rounded border-2 border-slate-300 checked:bg-emerald-500 checked:border-emerald-500 cursor-pointer accent-emerald-500">
+                    <span class="text-xs font-semibold text-slate-700">Show Recorded Only</span>
+                </label>
             </div>
-            <div class="text-xs text-slate-400 font-medium">
-                <i class="fa-solid fa-volume-high text-blue-500"></i> Click play to hear animal sound
+
+            <!-- Categories Section -->
+            <div class="space-y-3 pb-4 border-b border-slate-200/80">
+                <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Categories</h3>
+                <div id="category-chips" class="space-y-2 flex flex-col"></div>
+            </div>
+
+            <!-- Pagination Section -->
+            <div class="space-y-3 pt-2">
+                <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Pagination</h3>
+                
+                <div class="space-y-2.5">
+                    <label class="text-xs font-bold text-slate-600 block">Items per page</label>
+                    <select id="pagination-select" onchange="handlePaginationChange()" class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 focus:ring-2 focus:ring-blue-500 focus:bg-white transition cursor-pointer">
+                        <option value="10">10 items</option>
+                        <option value="20" selected>20 items</option>
+                        <option value="30">30 items</option>
+                        <option value="50">50 items</option>
+                        <option value="all">All items</option>
+                    </select>
+                </div>
+
+                <div id="pagination-info" class="text-xs font-medium text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <div class="font-bold mb-2"><i class="fa-solid fa-book text-blue-500 mr-1.5"></i>Page <span id="current-page-info">1</span><span id="total-pages-info"></span></div>
+                    <div class="flex gap-2">
+                        <button id="prev-page-btn" onclick="previousPage()" class="flex-1 px-2 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold text-xs transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5" disabled>
+                            <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                            <span>Prev</span>
+                        </button>
+                        <button id="next-page-btn" onclick="nextPage()" class="flex-1 px-2 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold text-xs transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5">
+                            <span>Next</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-[10px] text-slate-500 p-2 bg-blue-50 rounded-lg border border-blue-200 leading-relaxed">
+                    <strong>📊 Tip:</strong> Use pagination to browse animals page by page for better performance.
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 overflow-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+            <!-- Search & Filter Controls -->
+            <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 mb-6">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="search-input" placeholder="Search 114 animals, habitats, or sound effects..." oninput="handleSearch()"
+                            class="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-sm font-semibold text-slate-800 placeholder-slate-400 transition outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid Status Header -->
+            <div class="flex items-center justify-between mb-5">
+                <div class="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                    <span>Results:</span>
+                    <span id="animal-count-badge" class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-mono font-bold">0</span>
+                </div>
+                <div class="text-xs text-slate-400 font-medium">
+                    <i class="fa-solid fa-volume-high text-blue-500"></i> Click play to hear animal sound
+                </div>
+            </div>
+
+            <!-- Animals Grid Container -->
+            <div id="animals-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"></div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-16 bg-white rounded-3xl border border-slate-200/80 p-8 my-6">
+                <div class="text-5xl mb-3">🔍</div>
+                <h3 class="text-lg font-bold text-slate-800 mb-1">No animals found</h3>
+                <p class="text-xs text-slate-500 max-w-sm mx-auto mb-4">Try adjusting your search query or select another category filter.</p>
+                <button onclick="resetFilters()" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition">Show All 114 Animals</button>
             </div>
         </div>
-
-        <!-- Animals Grid Container -->
-        <div id="animals-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></div>
-
-        <!-- Empty State -->
-        <div id="empty-state" class="hidden text-center py-16 bg-white rounded-3xl border border-slate-200/80 p-8 my-6">
-            <div class="text-5xl mb-3">🔍</div>
-            <h3 class="text-lg font-bold text-slate-800 mb-1">No animals found</h3>
-            <p class="text-xs text-slate-500 max-w-sm mx-auto mb-4">Try adjusting your search query or select another category filter.</p>
-            <button onclick="resetFilters()" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition">Show All 114 Animals</button>
-        </div>
-
     </main>
 
     <!-- Voice Recording Modal -->
@@ -345,6 +398,9 @@
         let currentlyPlayingId = null;
         let recordedAudioUrls = {};
         let activeRecordAnimalId = null;
+        let recordedOnlyFilter = false;
+        let itemsPerPage = 20;
+        let currentPage = 1;
 
         let mediaRecorder = null;
         let audioChunks = [];
@@ -407,13 +463,13 @@
                 const count = cat === 'All' ? animalsData.length : animalsData.filter(a => a.category === cat).length;
                 return `
                     <button onclick="setCategory('${cat}')" 
-                        class="px-4 py-2 rounded-2xl text-xs font-extrabold transition-all whitespace-nowrap active:scale-95 flex items-center gap-1.5 ${
+                        class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center justify-between ${
                             isActive 
-                            ? 'bg-slate-900 text-white shadow-md' 
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' 
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                         }">
                         <span>${cat}</span>
-                        <span class="text-[10px] opacity-75 bg-slate-700/20 px-1.5 py-0.2 rounded-full font-mono">${count}</span>
+                        <span class="text-[10px] opacity-75 bg-slate-700/20 px-1.5 py-0.5 rounded-lg font-mono font-semibold">${count}</span>
                     </button>
                 `;
             }).join('');
@@ -433,7 +489,12 @@
         function resetFilters() {
             selectedCategory = 'All';
             searchQuery = '';
+            recordedOnlyFilter = false;
+            currentPage = 1;
+            itemsPerPage = 20;
             document.getElementById('search-input').value = '';
+            document.getElementById('recorded-only-toggle').checked = false;
+            document.getElementById('pagination-select').value = '20';
             renderCategories();
             renderList();
         }
@@ -442,14 +503,15 @@
             const grid = document.getElementById('animals-grid');
             const emptyState = document.getElementById('empty-state');
 
-            const filtered = animalsData.filter(animal => {
+            let filtered = animalsData.filter(animal => {
                 const matchesCat = selectedCategory === 'All' || animal.category === selectedCategory;
                 const matchesSearch = !searchQuery || 
                     animal.name.toLowerCase().includes(searchQuery) || 
                     animal.sciName.toLowerCase().includes(searchQuery) ||
                     animal.soundDesc.toLowerCase().includes(searchQuery) ||
                     animal.category.toLowerCase().includes(searchQuery);
-                return matchesCat && matchesSearch;
+                const matchesRecordedOnly = !recordedOnlyFilter || !!recordedAudioUrls[animal.id];
+                return matchesCat && matchesSearch && matchesRecordedOnly;
             });
 
             document.getElementById('animal-count-badge').textContent = filtered.length;
@@ -457,12 +519,25 @@
             if (filtered.length === 0) {
                 grid.innerHTML = '';
                 emptyState.classList.remove('hidden');
+                updatePaginationUI(0);
                 return;
             }
 
             emptyState.classList.add('hidden');
 
-            grid.innerHTML = filtered.map(animal => {
+            // Pagination logic
+            const totalPages = itemsPerPage === 'all' ? 1 : Math.ceil(filtered.length / itemsPerPage);
+            const actualItemsPerPage = itemsPerPage === 'all' ? filtered.length : itemsPerPage;
+            
+            // Ensure current page is valid
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIdx = (currentPage - 1) * actualItemsPerPage;
+            const endIdx = startIdx + actualItemsPerPage;
+            const paginatedAnimals = filtered.slice(startIdx, endIdx);
+
+            grid.innerHTML = paginatedAnimals.map(animal => {
                 const isPlaying = currentlyPlayingId === animal.id;
                 const hasCustomVoice = !!recordedAudioUrls[animal.id];
 
@@ -527,6 +602,52 @@
                     </div>
                 `;
             }).join('');
+
+            updatePaginationUI(totalPages);
+        }
+
+        function updatePaginationUI(totalPages) {
+            const prevBtn = document.getElementById('prev-page-btn');
+            const nextBtn = document.getElementById('next-page-btn');
+            const pageInfo = document.getElementById('current-page-info');
+            const totalInfo = document.getElementById('total-pages-info');
+
+            pageInfo.textContent = `Page ${currentPage}`;
+            if (totalPages > 1) {
+                totalInfo.textContent = `of ${totalPages}`;
+            } else {
+                totalInfo.textContent = '';
+            }
+
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages || totalPages === 0;
+        }
+
+        function nextPage() {
+            currentPage++;
+            renderList();
+            window.scrollTo(0, 0);
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderList();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function handlePaginationChange() {
+            const selectVal = document.getElementById('pagination-select').value;
+            itemsPerPage = selectVal === 'all' ? 'all' : parseInt(selectVal);
+            currentPage = 1;
+            renderList();
+        }
+
+        function handleRecordedOnlyFilter() {
+            recordedOnlyFilter = document.getElementById('recorded-only-toggle').checked;
+            currentPage = 1;
+            renderList();
         }
 
         function fallbackToSynthesis(animal) {
