@@ -1,783 +1,812 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animal Sounds Directory & Voice Recorder</title>
-    <!-- Tailwind CSS -->
+    <title>Sounds of the Wild - Interactive Animal Sound Directory</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    keyframes: {
+                        pulseRing: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0.8' },
+                            '50%': { transform: 'scale(1.08)', opacity: '0.4' },
+                            '100%': { transform: 'scale(0.95)', opacity: '0.8' },
+                        },
+                        wave: {
+                            '0%, 100%': { height: '6px' },
+                            '50%': { height: '24px' }
+                        }
+                    },
+                    animation: {
+                        'pulse-ring': 'pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'wave-bar-1': 'wave 0.6s infinite ease-in-out',
+                        'wave-bar-2': 'wave 0.8s infinite ease-in-out 0.1s',
+                        'wave-bar-3': 'wave 0.5s infinite ease-in-out 0.2s',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
-            min-height: 100vh;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-        }
-        .emoji-shadow {
-            filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.12));
-            transition: transform 0.2s ease;
-        }
-        .animal-card:hover .emoji-shadow {
-            transform: scale(1.15) rotate(3deg);
-        }
-        .wave-bar {
-            width: 4px;
-            height: 16px;
-            background-color: #0284c7;
-            border-radius: 9999px;
-            transition: height 0.15s ease;
-        }
-        .wave-bar.active {
-            animation: wavePulse 0.5s infinite alternate ease-in-out;
-        }
-        @keyframes wavePulse {
-            0% { height: 6px; }
-            100% { height: 28px; }
-        }
-        .playing-glow {
-            box-shadow: 0 0 20px rgba(14, 165, 233, 0.35);
-            border-color: #38bdf8 !important;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .btn-gradient-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35); }
+        .btn-gradient-primary:hover { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); box-shadow: 0 6px 20px 0 rgba(37, 99, 235, 0.45); }
+        .btn-gradient-accent { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 4px 14px 0 rgba(245, 158, 11, 0.35); }
+        .btn-gradient-accent:hover { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); box-shadow: 0 6px 20px 0 rgba(245, 158, 11, 0.45); }
+        .card-hover-effect { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover-effect:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(15, 23, 42, 0.12); }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen text-slate-800 pb-12">
+<body class="min-h-screen text-slate-800 flex flex-col">
 
-    <!-- Header Navbar -->
-    <header class="sticky top-0 z-30 glass-card shadow-sm border-b border-sky-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-xl shadow-md">
-                    🦁
-                </div>
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white text-2xl shadow-lg shadow-emerald-500/20 transform hover:rotate-6 transition duration-300">🐾</div>
                 <div>
-                    <h1 class="text-xl font-extrabold tracking-tight text-slate-900 leading-tight">
-                        Animal Sounds Studio
+                    <h1 class="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+                        Sounds of the Wild
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 uppercase tracking-wider">114 Animals</span>
                     </h1>
-                    <p class="text-xs font-semibold text-slate-500">Record your own voice for 114 animals!</p>
+                    <p class="text-xs font-medium text-slate-500">Explore animal sounds by category & record custom voices</p>
                 </div>
             </div>
 
-            <!-- Global Action Controls -->
-            <div class="flex items-center gap-2 flex-wrap">
-                <button id="random-sound-btn" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95">
-                    <i class="fa-solid fa-dice text-sky-500"></i>
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <button onclick="openQuizModal()" class="btn-gradient-accent text-white px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>Sound Quiz Game</span>
+                </button>
+                <button id="surprise-btn" onclick="playRandomSound()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95 border border-slate-200">
+                    <i class="fa-solid fa-dice text-amber-500"></i>
                     <span>Surprise Me</span>
-                </button>
-                <button id="play-all-btn" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md active:scale-95">
-                    <i class="fa-solid fa-play"></i>
-                    <span>Play Sequence</span>
-                </button>
-                <button id="copy-btn" onclick="copyListFormatted()" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95">
-                    <i class="fa-solid fa-copy text-indigo-500"></i>
-                    <span>Copy List</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Live Audio Banner -->
-    <div id="audio-banner" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-4">
-        <div class="glass-card rounded-2xl p-3 sm:p-4 flex items-center justify-between shadow-sm border border-sky-200/80 bg-white/70">
-            <div class="flex items-center space-x-3">
-                <div id="banner-emoji" class="text-3xl select-none">🐾</div>
-                <div>
-                    <div id="banner-title" class="text-sm font-bold text-slate-800">Ready to listen or record</div>
-                    <div id="banner-subtitle" class="text-xs text-slate-500">Click any animal card to play your voice or record a sound</div>
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- Search & Filter Controls -->
+        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 mb-6 space-y-4">
+            <div class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="search-input" placeholder="Search 114 animals, habitats, or sound effects..." oninput="handleSearch()"
+                        class="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-sm font-semibold text-slate-800 placeholder-slate-400 transition outline-none">
                 </div>
+                <button onclick="resetFilters()" class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                    <span>Reset</span>
+                </button>
             </div>
-            
-            <div class="flex items-center space-x-1.5 px-3 py-2 bg-sky-50 rounded-xl border border-sky-100">
-                <div class="wave-bar" id="wb-1"></div>
-                <div class="wave-bar" id="wb-2"></div>
-                <div class="wave-bar" id="wb-3"></div>
-                <div class="wave-bar" id="wb-4"></div>
-                <div class="wave-bar" id="wb-5"></div>
-            </div>
+
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar" id="category-chips"></div>
         </div>
-    </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-5 flex-1 flex flex-col">
-        <!-- Search & View Bar -->
-        <div class="flex flex-col md:flex-row gap-3 items-center justify-between mb-4">
-            <!-- Search Input -->
-            <div class="relative w-full md:w-80">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                <input type="text" id="search-input" placeholder="Search 114 animals by name, # or category..." 
-                    class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all shadow-sm">
+        <!-- Grid Status Header -->
+        <div class="flex items-center justify-between mb-4">
+            <div class="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                <span>Animals Count:</span>
+                <span id="animal-count-badge" class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-mono">0</span>
             </div>
-
-            <!-- View Switcher & Stats -->
-            <div class="flex items-center justify-between w-full md:w-auto gap-4">
-                <div class="text-xs font-semibold text-slate-500 bg-white/80 px-3 py-2 rounded-xl border border-slate-200 shadow-sm">
-                    Showing <span id="stat-showing" class="font-extrabold text-sky-600">114</span> of 114 animals
-                </div>
-
-                <div class="flex bg-slate-200/80 p-1 rounded-xl gap-1">
-                    <button id="view-grid-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-sky-600 shadow-sm flex items-center gap-1">
-                        <i class="fa-solid fa-grip"></i>
-                        <span class="hidden sm:inline">Grid</span>
-                    </button>
-                    <button id="view-table-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1">
-                        <i class="fa-solid fa-list"></i>
-                        <span class="hidden sm:inline">Table</span>
-                    </button>
-                </div>
+            <div class="text-xs text-slate-400 font-medium">
+                <i class="fa-solid fa-volume-high text-blue-500"></i> Click play to hear animal sound
             </div>
         </div>
 
-        <!-- Category Filters -->
-        <div id="category-pills" class="flex items-center gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
-            <!-- Dynamically populated categories -->
-        </div>
+        <!-- Animals Grid Container -->
+        <div id="animals-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></div>
 
-        <!-- Grid View Container -->
-        <div id="grid-view" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-4">
-            <!-- Dynamic Grid Cards -->
-        </div>
-
-        <!-- Table View Container -->
-        <div id="table-view" class="hidden glass-card rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-100/80 text-slate-500 text-[11px] font-extrabold uppercase tracking-wider border-b border-slate-200">
-                            <th class="py-3 px-4 text-center">#</th>
-                            <th class="py-3 px-4 text-center">Icon</th>
-                            <th class="py-3 px-4">Animal Name</th>
-                            <th class="py-3 px-4">Category</th>
-                            <th class="py-3 px-4 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body" class="divide-y divide-slate-100 text-sm font-medium">
-                        <!-- Dynamic Table Rows -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Empty Results State -->
-        <div id="no-results" class="hidden glass-card rounded-2xl p-12 text-center my-8">
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-16 bg-white rounded-3xl border border-slate-200/80 p-8 my-6">
             <div class="text-5xl mb-3">🔍</div>
-            <h3 class="text-base font-bold text-slate-800">No animals found</h3>
-            <p class="text-xs text-slate-500 mt-1">Try adjusting your search query or selecting a different category filter.</p>
+            <h3 class="text-lg font-bold text-slate-800 mb-1">No animals found</h3>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto mb-4">Try adjusting your search query or select another category filter.</p>
+            <button onclick="resetFilters()" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition">Show All 114 Animals</button>
         </div>
+
     </main>
 
-    <!-- Voice Recording Studio Modal -->
+    <!-- Voice Recording Modal -->
     <div id="record-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative animate-in fade-in zoom-in duration-200">
-            <!-- Close Button -->
             <button onclick="closeRecordModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-
-            <!-- Modal Header -->
-            <div class="text-center mb-6">
-                <div id="modal-emoji" class="text-6xl mb-2 select-none">🐄</div>
-                <h3 id="modal-title" class="text-xl font-extrabold text-slate-900">Record Cow Voice</h3>
-                <p class="text-xs text-slate-500 font-medium">Make your sound into your microphone!</p>
+            <div class="text-center mb-5">
+                <div id="modal-animal-emoji" class="text-5xl mb-2 transform hover:scale-110 transition duration-200">🦁</div>
+                <h3 class="text-xl font-extrabold text-slate-900" id="modal-animal-name">Record Animal Sound</h3>
+                <p class="text-xs text-slate-500 font-medium mt-0.5">Record your imitation and apply voice FX!</p>
             </div>
-
-            <!-- Recording Display Box -->
-            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 text-center mb-6">
-                <div id="timer-display" class="text-3xl font-mono font-extrabold text-slate-700 tracking-wider mb-2">
-                    00:00
-                </div>
-
+            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 text-center mb-5">
+                <div id="timer-display" class="text-3xl font-mono font-extrabold text-slate-700 tracking-wider mb-2">00:00</div>
                 <div id="mic-status-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700">
                     <span class="w-2 h-2 rounded-full bg-slate-400"></span>
                     <span id="mic-status-text">Microphone Ready</span>
                 </div>
-
-                <!-- Live Preview Player (shown after recording) -->
-                <audio id="recording-preview" controls class="w-full mt-4 hidden rounded-lg"></audio>
-            </div>
-
-            <!-- Recording Action Buttons -->
-            <div class="space-y-3">
-                <button id="record-action-btn" onclick="toggleRecordState()" class="w-full py-3.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm transition shadow-lg flex items-center justify-center gap-2 active:scale-98">
-                    <i class="fa-solid fa-microphone"></i>
-                    <span id="record-btn-text">Start Recording</span>
-                </button>
-
-                <div id="recorded-options" class="grid grid-cols-2 gap-2 hidden">
-                    <button onclick="resetRecording()" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-rotate-right"></i>
-                        <span>Redo Voice</span>
-                    </button>
-                    <button onclick="saveRecording()" class="py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-md">
-                        <i class="fa-solid fa-check"></i>
-                        <span>Save Voice</span>
-                    </button>
+                <audio id="recording-preview" controls class="w-full mt-4 hidden rounded-lg shadow-inner"></audio>
+                <div id="voice-fx-container" class="mt-4 hidden text-left border-t border-slate-200/80 pt-3">
+                    <label class="block text-[11px] font-extrabold text-slate-500 uppercase tracking-wider mb-2">Voice FX Filters:</label>
+                    <div class="grid grid-cols-4 gap-1.5">
+                        <button onclick="setVoiceFx('normal')" id="fx-normal" class="fx-btn active-fx text-xs font-bold py-2 rounded-xl bg-blue-600 text-white transition text-center shadow-sm">Normal</button>
+                        <button onclick="setVoiceFx('chipmunk')" id="fx-chipmunk" class="fx-btn text-xs font-bold py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 transition text-center">🐿️ Chipmunk</button>
+                        <button onclick="setVoiceFx('monster')" id="fx-monster" class="fx-btn text-xs font-bold py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 transition text-center">👹 Monster</button>
+                        <button onclick="setVoiceFx('echo')" id="fx-echo" class="fx-btn text-xs font-bold py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 transition text-center">📻 Echo</button>
+                    </div>
                 </div>
+            </div>
+            <div class="flex items-center justify-center gap-3">
+                <button id="record-btn" onclick="toggleRecording()" class="w-14 h-14 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white text-xl shadow-lg shadow-rose-500/30 flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                <button id="save-rec-btn" onclick="saveRecording()" disabled class="flex-1 py-3.5 px-4 rounded-2xl bg-slate-200 text-slate-400 font-bold text-xs transition flex items-center justify-center gap-2 cursor-not-allowed">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save Voice</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Custom Toast UI -->
-    <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl transform translate-y-16 opacity-0 transition-all duration-300 flex items-center gap-2 pointer-events-none">
-        <i class="fa-solid fa-circle-info text-sky-400"></i>
-        <span id="toast-msg">Notification</span>
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative animate-in fade-in zoom-in duration-200">
+            <button onclick="closeQuizModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-center mb-4">
+                <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 mb-2 border border-amber-200">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>Score: <span id="quiz-score">0</span></span>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-900">Guess the Animal Sound!</h3>
+                <p class="text-xs text-slate-500 font-medium">Listen closely and pick the matching animal</p>
+            </div>
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 text-center border border-blue-100 mb-5 shadow-inner">
+                <button onclick="playQuizSound()" class="w-16 h-16 rounded-2xl btn-gradient-primary text-white text-2xl shadow-lg transition transform active:scale-95 mx-auto flex items-center justify-center mb-2">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <div class="text-xs font-bold text-blue-700">Tap to Play Sound</div>
+            </div>
+            <div id="quiz-options" class="grid grid-cols-2 gap-2.5"></div>
+            <div id="quiz-feedback" class="mt-4 text-center text-xs font-extrabold hidden p-3 rounded-2xl transition"></div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl transform translate-y-16 opacity-0 transition-all duration-300 flex items-center gap-2.5 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-circle-info text-emerald-400 text-sm"></i>
+        <span id="toast-msg">Notification message</span>
     </div>
 
     <script>
-        // --- COMPLETE 114 ANIMALS DATASET ---
+        // 114 Animals Dataset across 9 Categories
         const animalsData = [
-            // Farm & Domestic
-            { id: 1, name: "Dog", emoji: "🐶", category: "Farm & Domestic", synthType: "bark" },
-            { id: 2, name: "Cat", emoji: "🐱", category: "Farm & Domestic", synthType: "meow" },
-            { id: 3, name: "Cow", emoji: "🐮", category: "Farm & Domestic", synthType: "moo" },
-            { id: 4, name: "Pig", emoji: "🐷", category: "Farm & Domestic", synthType: "oink" },
-            { id: 5, name: "Sheep", emoji: "🐑", category: "Farm & Domestic", synthType: "baa" },
-            { id: 6, name: "Horse", emoji: "🐴", category: "Farm & Domestic", synthType: "neigh" },
-            { id: 7, name: "Rooster", emoji: "🐓", category: "Farm & Domestic", synthType: "crow" },
-            { id: 8, name: "Duck", emoji: "🦆", category: "Farm & Domestic", synthType: "quack" },
-            { id: 9, name: "Goat", emoji: "🐐", category: "Farm & Domestic", synthType: "bleat" },
-            { id: 10, name: "Donkey", emoji: "🫏", category: "Farm & Domestic", synthType: "bray" },
-            { id: 11, name: "Hen", emoji: "🐔", category: "Farm & Domestic", synthType: "cluck" },
-            { id: 12, name: "Turkey", emoji: "🦃", category: "Farm & Domestic", synthType: "gobble" },
-            { id: 13, name: "Goose", emoji: "🪿", category: "Farm & Domestic", synthType: "honk" },
-            { id: 14, name: "Alpaca", emoji: "🦙", category: "Farm & Domestic", synthType: "hum" },
-            { id: 15, name: "Rabbit", emoji: "🐰", category: "Farm & Domestic", synthType: "squeak" },
+            // Farm (13)
+            { id: 'cow', name: 'Cow', sciName: 'Bos taurus', category: 'Farm', emoji: '🐮', soundDesc: 'Deep Moo', fact: 'Cows have best friends and experience stress when separated.', synthType: 'moo' },
+            { id: 'dog', name: 'Dog', sciName: 'Canis lupus familiaris', category: 'Farm', emoji: '🐶', soundDesc: 'Playful Bark', fact: 'Dogs have a sense of smell 10,000x stronger than humans.', synthType: 'bark' },
+            { id: 'rooster', name: 'Rooster', sciName: 'Gallus gallus domesticus', category: 'Farm', emoji: '🐓', soundDesc: 'Crowing Call', fact: 'Roosters crow to signal territory at dawn.', synthType: 'chirp' },
+            { id: 'duck', name: 'Duck', sciName: 'Anas platyrhynchos', category: 'Farm', emoji: '🦆', soundDesc: 'Quack', fact: 'Ducks have waterproof feathers due to a special oil gland.', synthType: 'quack' },
+            { id: 'sheep', name: 'Sheep', sciName: 'Ovis aries', category: 'Farm', emoji: '🐑', soundDesc: 'Gentle Baa', fact: 'Sheep have rectangular pupils giving 300-degree vision.', synthType: 'moo' },
+            { id: 'horse', name: 'Horse', sciName: 'Equus caballus', category: 'Farm', emoji: '🐴', soundDesc: 'Vibrant Neigh', fact: 'Horses can sleep both standing up and lying down.', synthType: 'trumpet' },
+            { id: 'pig', name: 'Pig', sciName: 'Sus domesticus', category: 'Farm', emoji: '🐷', soundDesc: 'Oink Oink', fact: 'Pigs are extremely intelligent and learn tricks faster than dogs.', synthType: 'bark' },
+            { id: 'goat', name: 'Goat', sciName: 'Capra hircus', category: 'Farm', emoji: '🐐', soundDesc: 'Bleat Call', fact: 'Goats have accent-like variations in their vocal calls.', synthType: 'moo' },
+            { id: 'donkey', name: 'Donkey', sciName: 'Equus asinus', category: 'Farm', emoji: '🫏', soundDesc: 'Hee-Haw', fact: 'Donkey braying can carry across 60 miles of desert.', synthType: 'trumpet' },
+            { id: 'turkey', name: 'Turkey', sciName: 'Meleagris gallopavo', category: 'Farm', emoji: '🦃', soundDesc: 'Gobble', fact: 'Turkeys can run up to 25 miles per hour.', synthType: 'chirp' },
+            { id: 'llama', name: 'Llama', sciName: 'Lama glama', category: 'Farm', emoji: '🦙', soundDesc: 'Humming sound', fact: 'Llamas communicate by humming when curious or concerned.', synthType: 'moo' },
+            { id: 'goose', name: 'Goose', sciName: 'Anser anser', category: 'Farm', emoji: '🪿', soundDesc: 'Honk Call', fact: 'Geese fly in a V-formation to save energy during long flights.', synthType: 'quack' },
+            { id: 'chick', name: 'Chicken', sciName: 'Gallus gallus', category: 'Farm', emoji: '🐥', soundDesc: 'Soft Peep', fact: 'Chickens communicate using over 30 distinct vocal sounds.', synthType: 'chirp' },
 
-            // Wild & Safari
-            { id: 16, name: "Lion", emoji: "🦁", category: "Wild & Safari", synthType: "roar" },
-            { id: 17, name: "Tiger", emoji: "🐅", category: "Wild & Safari", synthType: "growl" },
-            { id: 18, name: "Elephant", emoji: "🐘", category: "Wild & Safari", synthType: "trumpet" },
-            { id: 19, name: "Monkey", emoji: "🐒", category: "Wild & Safari", synthType: "chatter" },
-            { id: 20, name: "Gorilla", emoji: "🦍", category: "Wild & Safari", synthType: "grunt" },
-            { id: 21, name: "Bear", emoji: "🐻", category: "Wild & Safari", synthType: "growl" },
-            { id: 22, name: "Wolf", emoji: "🐺", category: "Wild & Safari", synthType: "howl" },
-            { id: 23, name: "Fox", emoji: "🦊", category: "Wild & Safari", synthType: "yap" },
-            { id: 24, name: "Giraffe", emoji: "🦒", category: "Wild & Safari", synthType: "hum" },
-            { id: 25, name: "Zebra", emoji: "🦓", category: "Wild & Safari", synthType: "bark" },
-            { id: 26, name: "Hippo", emoji: "🦛", category: "Wild & Safari", synthType: "grunt" },
-            { id: 27, name: "Rhino", emoji: "🦏", category: "Wild & Safari", synthType: "snort" },
-            { id: 28, name: "Cheetah", emoji: "🐆", category: "Wild & Safari", synthType: "purr" },
-            { id: 29, name: "Leopard", emoji: "🐆", category: "Wild & Safari", synthType: "roar" },
-            { id: 30, name: "Hyena", emoji: "🦡", category: "Wild & Safari", synthType: "laugh" },
-            { id: 31, name: "Camel", emoji: "🐪", category: "Wild & Safari", synthType: "grunt" },
-            { id: 32, name: "Panda", emoji: "🐼", category: "Wild & Safari", synthType: "squeak" },
-            { id: 33, name: "Polar Bear", emoji: "🧊🐻", category: "Wild & Safari", synthType: "growl" },
-            { id: 34, name: "Sloth", emoji: "🦥", category: "Wild & Safari", synthType: "squeak" },
-            { id: 35, name: "Chimpanzee", emoji: "🦧", category: "Wild & Safari", synthType: "screech" },
+            // Safari (13)
+            { id: 'lion', name: 'Lion', sciName: 'Panthera leo', category: 'Safari', emoji: '🦁', soundDesc: 'Mighty Roar', fact: 'Lions roars can be heard up to 5 miles away!', synthType: 'roar' },
+            { id: 'elephant', name: 'Elephant', sciName: 'Loxodonta africana', category: 'Safari', emoji: '🐘', soundDesc: 'Loud Trumpet', fact: 'Elephants communicate using low vibrations through their feet.', synthType: 'trumpet' },
+            { id: 'monkey', name: 'Monkey', sciName: 'Simiiformes', category: 'Safari', emoji: '🐒', soundDesc: 'Chatter', fact: 'Monkeys use facial expressions and vocalizations to communicate.', synthType: 'chirp' },
+            { id: 'cheetah', name: 'Cheetah', sciName: 'Acinonyx jubatus', category: 'Safari', emoji: '🐆', soundDesc: 'High Chirp', fact: 'Cheetahs purr and chirp instead of roaring.', synthType: 'chirp' },
+            { id: 'leopard', name: 'Leopard', sciName: 'Panthera pardus', category: 'Safari', emoji: '🎷', soundDesc: 'Grunting Bark', fact: 'Leopards are nocturnal hunters with exceptional tree-climbing skills.', synthType: 'roar' },
+            { id: 'zebra', name: 'Zebra', sciName: 'Equus quagga', category: 'Safari', emoji: '🦓', soundDesc: 'Barking Bray', fact: 'No two zebras have identical stripe patterns.', synthType: 'bark' },
+            { id: 'giraffe', name: 'Giraffe', sciName: 'Giraffa camelopardalis', category: 'Safari', emoji: '🦒', soundDesc: 'Low Hum', fact: 'Giraffes hum at low frequencies during night hours.', synthType: 'whalesong' },
+            { id: 'rhino', name: 'Rhinoceros', sciName: 'Rhinocerotidae', category: 'Safari', emoji: '🦏', soundDesc: 'Snort Sound', fact: 'Rhino horns are made of keratin, the same material as human hair.', synthType: 'roar' },
+            { id: 'hippo', name: 'Hippopotamus', sciName: 'Hippopotamus amphibius', category: 'Safari', emoji: '🦛', soundDesc: 'Wheeze-Grown', fact: 'Hippos secrete a red oily substance that acts as natural sunscreen.', synthType: 'roar' },
+            { id: 'hyena', name: 'Spotted Hyena', sciName: 'Crocuta crocuta', category: 'Safari', emoji: '🐺', soundDesc: 'Giggle Laugh', fact: 'Hyena laughs communicate excitement or social rank.', synthType: 'bark' },
+            { id: 'gorilla', name: 'Gorilla', sciName: 'Gorilla gorilla', category: 'Safari', emoji: '🦍', soundDesc: 'Chest Beat Growl', fact: 'Gorillas build new sleeping nests on the ground or trees each night.', synthType: 'roar' },
+            { id: 'baboon', name: 'Baboon', sciName: 'Papio', category: 'Safari', emoji: '🦧', soundDesc: 'Wahoo Bark', fact: 'Baboons travel in large hierarchical troops up to hundreds strong.', synthType: 'bark' },
+            { id: 'meerkat', name: 'Meerkat', sciName: 'Suricata suricatta', category: 'Safari', emoji: '🦦', soundDesc: 'Sentry Call', fact: 'Meerkats take turns acting as sentries to watch for predators.', synthType: 'chirp' },
 
-            // Birds
-            { id: 36, name: "Eagle", emoji: "🦅", category: "Birds", synthType: "screech" },
-            { id: 37, name: "Owl", emoji: "🦉", category: "Birds", synthType: "hoot" },
-            { id: 38, name: "Parrot", emoji: "🦜", category: "Birds", synthType: "squawk" },
-            { id: 39, name: "Penguin", emoji: "🐧", category: "Birds", synthType: "honk" },
-            { id: 40, name: "Flamingo", emoji: "🦩", category: "Birds", synthType: "honk" },
-            { id: 41, name: "Peacock", emoji: "🦚", category: "Birds", synthType: "call" },
-            { id: 42, name: "Swan", emoji: "🦢", category: "Birds", synthType: "hiss" },
-            { id: 43, name: "Raven", emoji: "🐦‍⬛", category: "Birds", synthType: "caw" },
-            { id: 44, name: "Hummingbird", emoji: "🐦", category: "Birds", synthType: "hum" },
-            { id: 45, name: "Woodpecker", emoji: "🪶", category: "Birds", synthType: "tap" },
-            { id: 46, name: "Falcon", emoji: "🦅", category: "Birds", synthType: "screech" },
-            { id: 47, name: "Ostrich", emoji: "🦩", category: "Birds", synthType: "boom" },
-            { id: 48, name: "Toucan", emoji: "🦜", category: "Birds", synthType: "croak" },
-            { id: 49, name: "Pigeon", emoji: "🕊️", category: "Birds", synthType: "coo" },
-            { id: 50, name: "Seagull", emoji: "🪿", category: "Birds", synthType: "squawk" },
+            // Pets (12)
+            { id: 'cat', name: 'Cat', sciName: 'Felis catus', category: 'Pets', emoji: '🐱', soundDesc: 'Meow & Purr', fact: 'Cats spend 70% of their lives sleeping.', synthType: 'meow' },
+            { id: 'parrot', name: 'Parrot', sciName: 'Psittaciformes', category: 'Pets', emoji: '🦜', soundDesc: 'Vocal Squawk', fact: 'Parrots can imitate human speech and intricate melodies.', synthType: 'chirp' },
+            { id: 'hamster', name: 'Hamster', sciName: 'Cricetinae', category: 'Pets', emoji: '🐹', soundDesc: 'Squeak', fact: 'Hamsters store food in large cheek pouches extending to shoulders.', synthType: 'chirp' },
+            { id: 'rabbit', name: 'Rabbit', sciName: 'Oryctolagus cuniculus', category: 'Pets', emoji: '🐰', soundDesc: 'Soft Thump', fact: 'Rabbits express delight by performing jumps called binkies.', synthType: 'chirp' },
+            { id: 'guineapig', name: 'Guinea Pig', sciName: 'Cavia porcellus', category: 'Pets', emoji: '🐹', soundDesc: 'Wheek Squeak', fact: 'Guinea pigs squeak with joy when hearing food preparations.', synthType: 'chirp' },
+            { id: 'canary', name: 'Canary', sciName: 'Serinus canaria', category: 'Pets', emoji: '🐤', soundDesc: 'Trill Song', fact: 'Canaries can learn melodies and sing in pitch rhythm.', synthType: 'chirp' },
+            { id: 'ferret', name: 'Ferret', sciName: 'Mustela putorius furo', category: 'Pets', emoji: '🦡', soundDesc: 'Dooking', fact: 'Ferrets make a chattering sound called dooking when happy.', synthType: 'chirp' },
+            { id: 'goldfish', name: 'Goldfish', sciName: 'Carassius auratus', category: 'Pets', emoji: '🐠', soundDesc: 'Bubble Pop', fact: 'Goldfish have a memory span of several months, not seconds.', synthType: 'quack' },
+            { id: 'turtle_pet', name: 'Pet Turtle', sciName: 'Testudines', category: 'Pets', emoji: '🐢', soundDesc: 'Soft Hiss', fact: 'Turtles can detect vibrations in land and water sounds.', synthType: 'hiss' },
+            { id: 'cockatiel', name: 'Cockatiel', sciName: 'Nymphicus hollandicus', category: 'Pets', emoji: '🪶', soundDesc: 'Whistle', fact: 'Male cockatiels are prone to whistling songs to their reflections.', synthType: 'chirp' },
+            { id: 'gecko_pet', name: 'Leopard Gecko', sciName: 'Eublepharis macularius', category: 'Pets', emoji: '🦎', soundDesc: 'Chirp Squeak', fact: 'Geckos lick their eyeballs to keep them clean and moist.', synthType: 'chirp' },
+            { id: 'chinchilla', name: 'Chinchilla', sciName: 'Chinchilla lanigera', category: 'Pets', emoji: '🐭', soundDesc: 'Kek Bark', fact: 'Chinchillas take dust baths instead of water baths.', synthType: 'chirp' },
 
-            // Ocean & Marine
-            { id: 51, name: "Whale", emoji: "🐳", category: "Ocean & Marine", synthType: "whalesong" },
-            { id: 52, name: "Dolphin", emoji: "🐬", category: "Ocean & Marine", synthType: "click" },
-            { id: 53, name: "Shark", emoji: "🦈", category: "Ocean & Marine", synthType: "splash" },
-            { id: 54, name: "Seal", emoji: "🦭", category: "Ocean & Marine", synthType: "bark" },
-            { id: 55, name: "Octopus", emoji: "🐙", category: "Ocean & Marine", synthType: "bubble" },
-            { id: 56, name: "Crab", emoji: "🦀", category: "Ocean & Marine", synthType: "click" },
-            { id: 57, name: "Sea Turtle", emoji: "🐢", category: "Ocean & Marine", synthType: "hiss" },
-            { id: 58, name: "Lobster", emoji: "🦞", category: "Ocean & Marine", synthType: "snap" },
-            { id: 59, name: "Squid", emoji: "🦑", category: "Ocean & Marine", synthType: "bubble" },
-            { id: 60, name: "Otter", emoji: "🦦", category: "Ocean & Marine", synthType: "chirp" },
-            { id: 61, name: "Walrus", emoji: "🦭", category: "Ocean & Marine", synthType: "bellow" },
-            { id: 62, name: "Tropical Fish", emoji: "🐠", category: "Ocean & Marine", synthType: "bubble" },
-            { id: 63, name: "Blowfish", emoji: "🐡", category: "Ocean & Marine", synthType: "pop" },
-            { id: 64, name: "Jellyfish", emoji: "🪼", category: "Ocean & Marine", synthType: "hum" },
-            { id: 65, name: "Coral", emoji: "🪸", category: "Ocean & Marine", synthType: "bubble" },
+            // Birds (13)
+            { id: 'owl', name: 'Owl', sciName: 'Strigiformes', category: 'Birds', emoji: '🦉', soundDesc: 'Night Hoot', fact: 'Owls can turn their heads up to 270 degrees.', synthType: 'hoot' },
+            { id: 'eagle', name: 'Bald Eagle', sciName: 'Haliaeetus leucocephalus', category: 'Birds', emoji: '🦅', soundDesc: 'Screaming Call', fact: 'Bald eagles can fly up to 10,000 feet high.', synthType: 'chirp' },
+            { id: 'flamingo', name: 'Flamingo', sciName: 'Phoenicopteridae', category: 'Birds', emoji: '🦩', soundDesc: 'Honk Squawk', fact: 'Flamingos get their pink color from pigments in shrimp.', synthType: 'quack' },
+            { id: 'peacock', name: 'Peacock', sciName: 'Pavo cristatus', category: 'Birds', emoji: '🦚', soundDesc: 'Loud Scream', fact: 'Peacocks spread fan tails to attract mates during courtship.', synthType: 'chirp' },
+            { id: 'pigeon', name: 'Pigeon', sciName: 'Columbidae', category: 'Birds', emoji: '🐦', soundDesc: 'Soft Coo', fact: 'Pigeons can navigate home using geomagnetic cues.', synthType: 'hoot' },
+            { id: 'toucan', name: 'Toucan', sciName: 'Ramphastidae', category: 'Birds', emoji: '🦜', soundDesc: 'Croaking Call', fact: 'Toucans regulate body temperature using large blood-filled beaks.', synthType: 'quack' },
+            { id: 'crow', name: 'Crow', sciName: 'Corvus', category: 'Birds', emoji: '🐦‍⬛', soundDesc: 'Caw Caw', fact: 'Crows recognize human faces and pass knowledge to offspring.', synthType: 'chirp' },
+            { id: 'hummingbird', name: 'Hummingbird', sciName: 'Trochilidae', category: 'Birds', emoji: '🐦', soundDesc: 'Wing Buzz', fact: 'Hummingbirds flap wings up to 80 times per second.', synthType: 'buzz' },
+            { id: 'woodpecker', name: 'Woodpecker', sciName: 'Picidae', category: 'Birds', emoji: '🪵', soundDesc: 'Pecking Drum', fact: 'Woodpeckers peck trees up to 20 times per second.', synthType: 'bark' },
+            { id: 'falcon', name: 'Peregrine Falcon', sciName: 'Falco peregrinus', category: 'Birds', emoji: '🦅', soundDesc: 'High Screech', fact: 'Peregrine falcons dive at speeds over 200 miles per hour.', synthType: 'chirp' },
+            { id: 'pelican', name: 'Pelican', sciName: 'Pelecanus', category: 'Birds', emoji: '🪿', soundDesc: 'Throat Croak', fact: 'Pelican pouches can hold up to 3 gallons of water.', synthType: 'quack' },
+            { id: 'stork', name: 'White Stork', sciName: 'Ciconia ciconia', category: 'Birds', emoji: '🦩', soundDesc: 'Bill Clatter', fact: 'Storks communicate mainly by clattering their beaks.', synthType: 'bark' },
+            { id: 'swan', name: 'Swan', sciName: 'Cygnus', category: 'Birds', emoji: '🦢', soundDesc: 'Hissing Trumpet', fact: 'Swans mate for life and defend nests aggressively.', synthType: 'trumpet' },
 
-            // Reptiles & Amphibians
-            { id: 66, name: "Frog", emoji: "🐸", category: "Reptiles & Amphibians", synthType: "ribbit" },
-            { id: 67, name: "Snake", emoji: "🐍", category: "Reptiles & Amphibians", synthType: "hiss" },
-            { id: 68, name: "Crocodile", emoji: "🐊", category: "Reptiles & Amphibians", synthType: "bellow" },
-            { id: 69, name: "Turtle", emoji: "🐢", category: "Reptiles & Amphibians", synthType: "hiss" },
-            { id: 70, name: "Lizard", emoji: "🦎", category: "Reptiles & Amphibians", synthType: "chirp" },
-            { id: 71, name: "Gecko", emoji: "🦎", category: "Reptiles & Amphibians", synthType: "click" },
-            { id: 72, name: "Chameleon", emoji: "🦎", category: "Reptiles & Amphibians", synthType: "hiss" },
-            { id: 73, name: "Salamander", emoji: "🦎", category: "Reptiles & Amphibians", synthType: "squeak" },
-            { id: 74, name: "Cobra", emoji: "🐍", category: "Reptiles & Amphibians", synthType: "hiss" },
-            { id: 75, name: "Toad", emoji: "🐸", category: "Reptiles & Amphibians", synthType: "croak" },
+            // Wild (13)
+            { id: 'wolf', name: 'Wolf', sciName: 'Canis lupus', category: 'Wild', emoji: '🐺', soundDesc: 'Haunting Howl', fact: 'Wolves howl to communicate over long distances.', synthType: 'howl' },
+            { id: 'bear', name: 'Grizzly Bear', sciName: 'Ursus arctos horribilis', category: 'Wild', emoji: '🐻', soundDesc: 'Deep Growl', fact: 'Bears possess a sense of smell 7x stronger than bloodhounds.', synthType: 'roar' },
+            { id: 'fox', name: 'Red Fox', sciName: 'Vulpes vulpes', category: 'Wild', emoji: '🦊', soundDesc: 'Screech Bark', fact: 'Foxes produce over 28 different vocal calls.', synthType: 'bark' },
+            { id: 'coyote', name: 'Coyote', sciName: 'Canis latrans', category: 'Wild', emoji: '🐕', soundDesc: 'Yip Howl', fact: 'Coyotes adapt quickly to rural, wilderness, and urban settings.', synthType: 'howl' },
+            { id: 'deer', name: 'White-tailed Deer', sciName: 'Odocoileus virginianus', category: 'Wild', emoji: '🦌', soundDesc: 'Snort Wheeze', fact: 'Deer communicate distress by blowing air through nostrils.', synthType: 'hiss' },
+            { id: 'moose', name: 'Moose', sciName: 'Alces alces', category: 'Wild', emoji: '🫎', soundDesc: 'Bellow Call', fact: 'Moose can swim up to 6 miles per hour continuously.', synthType: 'moo' },
+            { id: 'boar', name: 'Wild Boar', sciName: 'Sus scrofa', category: 'Wild', emoji: '🐗', soundDesc: 'Grunt Snort', fact: 'Wild boars forage subterranean roots using strong snouts.', synthType: 'bark' },
+            { id: 'bison', name: 'American Bison', sciName: 'Bison bison', category: 'Wild', emoji: '🦬', soundDesc: 'Low Grunt', fact: 'Bison are the largest land mammals in North America.', synthType: 'moo' },
+            { id: 'cougar', name: 'Mountain Lion', sciName: 'Puma concolor', category: 'Wild', emoji: '🐆', soundDesc: 'Screaming Call', fact: 'Mountain lions purr instead of roaring.', synthType: 'roar' },
+            { id: 'raccoon', name: 'Raccoon', sciName: 'Procyon lotor', category: 'Wild', emoji: '🦝', soundDesc: 'Chittering', fact: 'Raccoons examine food items with tactile front paws.', synthType: 'chirp' },
+            { id: 'beaver', name: 'Beaver', sciName: 'Castor canadensis', category: 'Wild', emoji: '🦫', soundDesc: 'Tail Slap', fact: 'Beavers slap tails against water to alert lodges of danger.', synthType: 'bark' },
+            { id: 'skunk', name: 'Skunk', sciName: 'Mephitidae', category: 'Wild', emoji: '🦨', soundDesc: 'Warning Stamp', fact: 'Skunks stamp feet before spraying scent as a warning.', synthType: 'hiss' },
+            { id: 'hedgehog', name: 'Hedgehog', sciName: 'Erinaceinae', category: 'Wild', emoji: '🦔', soundDesc: 'Snuffle Squeak', fact: 'Hedgehogs roll into spiky balls when threatened.', synthType: 'chirp' },
 
-            // Insects & Bugs
-            { id: 76, name: "Bee", emoji: "🐝", category: "Insects & Bugs", synthType: "buzz" },
-            { id: 77, name: "Cricket", emoji: "🦗", category: "Insects & Bugs", synthType: "chirp" },
-            { id: 78, name: "Mosquito", emoji: "🦟", category: "Insects & Bugs", synthType: "buzz" },
-            { id: 79, name: "Fly", emoji: "🪰", category: "Insects & Bugs", synthType: "buzz" },
-            { id: 80, name: "Ant", emoji: "🐜", category: "Insects & Bugs", synthType: "click" },
-            { id: 81, name: "Ladybug", emoji: "🐞", category: "Insects & Bugs", synthType: "flutter" },
-            { id: 82, name: "Butterfly", emoji: "🦋", category: "Insects & Bugs", synthType: "flutter" },
-            { id: 83, name: "Beetle", emoji: "🪲", category: "Insects & Bugs", synthType: "buzz" },
-            { id: 84, name: "Spider", emoji: "🕷️", category: "Insects & Bugs", synthType: "hiss" },
-            { id: 85, name: "Scorpion", emoji: "🦂", category: "Insects & Bugs", synthType: "click" },
+            // Aquatic (13)
+            { id: 'whale', name: 'Blue Whale', sciName: 'Balaenoptera musculus', category: 'Aquatic', emoji: '🐳', soundDesc: 'Ocean Song', fact: 'Blue whales produce sounds underwater heard hundreds of miles away.', synthType: 'whalesong' },
+            { id: 'dolphin', name: 'Bottlenose Dolphin', sciName: 'Tursiops truncatus', category: 'Aquatic', emoji: '🐬', soundDesc: 'Echolocation Click', fact: 'Dolphins call each other by unique signature whistle names.', synthType: 'chirp' },
+            { id: 'seal', name: 'Harbor Seal', sciName: 'Phoca vitulina', category: 'Aquatic', emoji: '🦭', soundDesc: 'Barking Sound', fact: 'Seals sleep underwater by surfacing for air automatically.', synthType: 'bark' },
+            { id: 'sea_lion', name: 'California Sea Lion', sciName: 'Zalophus californianus', category: 'Aquatic', emoji: '🦭', soundDesc: 'Loud Bark', fact: 'Sea lions can dance to musical rhythms in sync.', synthType: 'bark' },
+            { id: 'walrus', name: 'Walrus', sciName: 'Odobenus rosmarus', category: 'Aquatic', emoji: '🦭', soundDesc: 'Bell Whistle', fact: 'Walrus tusks grow up to three feet long.', synthType: 'trumpet' },
+            { id: 'orca', name: 'Killer Whale', sciName: 'Orcinus orca', category: 'Aquatic', emoji: '🐋', soundDesc: 'Pod Call', fact: 'Orca pods possess distinct vocal dialects.', synthType: 'whalesong' },
+            { id: 'otter', name: 'Sea Otter', sciName: 'Enhydra lutris', category: 'Aquatic', emoji: '🦦', soundDesc: 'Chirp Call', fact: 'Sea otters hold hands while sleeping to prevent drifting.', synthType: 'chirp' },
+            { id: 'penguin', name: 'Emperor Penguin', sciName: 'Aptenodytes forsteri', category: 'Aquatic', emoji: '🐧', soundDesc: 'Bray Call', fact: 'Penguin parents identify chicks by voice in crowded colonies.', synthType: 'quack' },
+            { id: 'manatee', name: 'Manatee', sciName: 'Trichechus', category: 'Aquatic', emoji: '🐋', soundDesc: 'Squeak Chirp', fact: 'Manatees communicate via chirps during shallow water grazing.', synthType: 'chirp' },
+            { id: 'hippo_aquatic', name: 'Pygmy Hippo', sciName: 'Choeropsis liberiensis', category: 'Aquatic', emoji: '🦛', soundDesc: 'Water Snort', fact: 'Pygmy hippos spend long periods submerged in streams.', synthType: 'moo' },
+            { id: 'lobster', name: 'Spiny Lobster', sciName: 'Palinuridae', category: 'Aquatic', emoji: '🦞', soundDesc: 'Rasp Sound', fact: 'Lobsters create rasp sounds by rubbing antennae bases.', synthType: 'hiss' },
+            { id: 'crab', name: 'Fiddler Crab', sciName: 'Uca', category: 'Aquatic', emoji: '🦀', soundDesc: 'Clack Sound', fact: 'Male fiddler crabs wave large claws to communicate.', synthType: 'bark' },
+            { id: 'narwhal', name: 'Narwhal', sciName: 'Monodon monoceros', category: 'Aquatic', emoji: '🐋', soundDesc: 'Click Whistle', fact: 'The narwhal tusk is an elongated sensory tooth.', synthType: 'whalesong' },
 
-            // Dinosaurs & Fantasy
-            { id: 86, name: "T-Rex", emoji: "🦖", category: "Dinosaurs & Fantasy", synthType: "roar" },
-            { id: 87, name: "Dragon", emoji: "🐉", category: "Dinosaurs & Fantasy", synthType: "roar" },
-            { id: 88, name: "Unicorn", emoji: "🦄", category: "Dinosaurs & Fantasy", synthType: "neigh" },
-            { id: 89, name: "Sauropod", emoji: "🦕", category: "Dinosaurs & Fantasy", synthType: "bellow" },
-            { id: 90, name: "Phoenix", emoji: "🔥🦅", category: "Dinosaurs & Fantasy", synthType: "screech" },
+            // Reptiles (13)
+            { id: 'snake', name: 'Rattlesnake', sciName: 'Crotalus', category: 'Reptiles', emoji: '🐍', soundDesc: 'Warning Hiss', fact: 'Snakes smell using their tongues.', synthType: 'hiss' },
+            { id: 'alligator', name: 'American Alligator', sciName: 'Alligator mississippiensis', category: 'Reptiles', emoji: '🐊', soundDesc: 'Bellow Roar', fact: 'Alligators produce low bellow sounds that vibrate water on their back.', synthType: 'roar' },
+            { id: 'chameleon', name: 'Veiled Chameleon', sciName: 'Chamaeleo calyptratus', category: 'Reptiles', emoji: '🦎', soundDesc: 'Soft Hiss', fact: 'Chameleons change skin color for temp regulation and signaling.', synthType: 'hiss' },
+            { id: 'cobra', name: 'King Cobra', sciName: 'Ophiophagus hannah', category: 'Reptiles', emoji: '🐍', soundDesc: 'Growling Hiss', fact: 'King cobras raise their bodies to eye-level when defensive.', synthType: 'hiss' },
+            { id: 'tortoise', name: 'Galapagos Tortoise', sciName: 'Chelonoidis niger', category: 'Reptiles', emoji: '🐢', soundDesc: 'Deep Bellow', fact: 'Galapagos tortoises live over 100 years in nature reserves.', synthType: 'moo' },
+            { id: 'komodo', name: 'Komodo Dragon', sciName: 'Varanus komodoensis', category: 'Reptiles', emoji: '🦎', soundDesc: 'Hissing Snort', fact: 'Komodo dragons are the largest living lizard species.', synthType: 'hiss' },
+            { id: 'iguana', name: 'Green Iguana', sciName: 'Iguana iguana', category: 'Reptiles', emoji: '🦎', soundDesc: 'Tail Whip Hiss', fact: 'Iguanas drop from high tree branches into water safely.', synthType: 'hiss' },
+            { id: 'tokay_gecko', name: 'Tokay Gecko', sciName: 'Gekko gecko', category: 'Reptiles', emoji: '🦎', soundDesc: 'To-Kay Call', fact: 'Tokay geckos bark loudly to defend their home territories.', synthType: 'bark' },
+            { id: 'anaconda', name: 'Green Anaconda', sciName: 'Eunectes murinus', category: 'Reptiles', emoji: '🐍', soundDesc: 'Deep Hiss', fact: 'Anacondas are among the heaviest snakes in the world.', synthType: 'hiss' },
+            { id: 'viper', name: 'Gaboon Viper', sciName: 'Bitis gabonica', category: 'Reptiles', emoji: '🐍', soundDesc: 'Loud Hiss', fact: 'Gaboon vipers possess the longest venom fangs of any snake.', synthType: 'hiss' },
+            { id: 'monito', name: 'Monitor Lizard', sciName: 'Varanus', category: 'Reptiles', emoji: '🦎', soundDesc: 'Throat Hiss', fact: 'Monitor lizards display keen intelligence while hunting.', synthType: 'hiss' },
+            { id: 'python', name: 'Ball Python', sciName: 'Python regius', category: 'Reptiles', emoji: '🐍', soundDesc: 'Air Hiss', fact: 'Ball pythons curl into a ball shape when startled.', synthType: 'hiss' },
+            { id: 'caiman', name: 'Spectacled Caiman', sciName: 'Caiman crocodilus', category: 'Reptiles', emoji: '🐊', soundDesc: 'Hatchling Call', fact: 'Caiman hatchlings chirp from eggs to sync hatching times.', synthType: 'chirp' },
 
-            // Australia & Asia
-            { id: 91, name: "Kangaroo", emoji: "🦘", category: "Australia & Asia", synthType: "thump" },
-            { id: 92, name: "Koala", emoji: "🐨", category: "Australia & Asia", synthType: "grunt" },
-            { id: 93, name: "Wombat", emoji: "🦡", category: "Australia & Asia", synthType: "grunt" },
-            { id: 94, name: "Platypus", emoji: "🦦", category: "Australia & Asia", synthType: "growl" },
-            { id: 95, name: "Tasmanian Devil", emoji: "🦡", category: "Australia & Asia", synthType: "screech" },
-            { id: 96, name: "Red Panda", emoji: "🦊", category: "Australia & Asia", synthType: "squeak" },
-            { id: 97, name: "Water Buffalo", emoji: "🐃", category: "Australia & Asia", synthType: "snort" },
-            { id: 98, name: "Monkey Macaque", emoji: "🐒", category: "Australia & Asia", synthType: "chatter" },
+            // Amphibians (12)
+            { id: 'frog', name: 'Bullfrog', sciName: 'Lithobates catesbeianus', category: 'Amphibians', emoji: '🐸', soundDesc: 'Deep Croak', fact: 'Frogs absorb water through skin instead of drinking.', synthType: 'ribbit' },
+            { id: 'treefrog', name: 'Tree Frog', sciName: 'Hyla cinerea', category: 'Amphibians', emoji: '🐸', soundDesc: 'High Trill', fact: 'Tree frogs have sticky toe pads to climb vertical surfaces.', synthType: 'ribbit' },
+            { id: 'toad', name: 'Cane Toad', sciName: 'Rhinella marina', category: 'Amphibians', emoji: '🐸', soundDesc: 'Trill Call', fact: 'Toads produce toxins behind their eyes for protection.', synthType: 'ribbit' },
+            { id: 'salamander', name: 'Spotted Salamander', sciName: 'Ambystoma maculatum', category: 'Amphibians', emoji: '🦎', soundDesc: 'Soft Squeak', fact: 'Salamanders can regenerate lost limbs and tail tissues.', synthType: 'chirp' },
+            { id: 'axolotl', name: 'Axolotl', sciName: 'Ambystoma mexicanum', category: 'Amphibians', emoji: '🫧', soundDesc: 'Bubble Pop', fact: 'Axolotls retain larval features throughout their lifespan.', synthType: 'quack' },
+            { id: 'newt', name: 'Rough-skinned Newt', sciName: 'Taricha granulosa', category: 'Amphibians', emoji: '🦎', soundDesc: 'Squeak Sound', fact: 'Newts produce warning coloration to signal toxins.', synthType: 'chirp' },
+            { id: 'dartfrog', name: 'Poison Dart Frog', sciName: 'Dendrobatidae', category: 'Amphibians', emoji: '🐸', soundDesc: 'Buzzing Chirp', fact: 'Bright colors warn predators of their toxicity.', synthType: 'buzz' },
+            { id: 'woodfrog', name: 'Wood Frog', sciName: 'Lithobates sylvaticus', category: 'Amphibians', emoji: '🐸', soundDesc: 'Quack Croak', fact: 'Wood frogs freeze solid in winter and thaw out in spring.', synthType: 'ribbit' },
+            { id: 'glassfrog', name: 'Glass Frog', sciName: 'Centrolenidae', category: 'Amphibians', emoji: '🐸', soundDesc: 'Whistle Chirp', fact: 'Glass frogs have translucent skin revealing internal organs.', synthType: 'chirp' },
+            { id: 'mudpuppy', name: 'Mudpuppy', sciName: 'Necturus maculosus', category: 'Amphibians', emoji: '🦎', soundDesc: 'Bark Sound', fact: 'Mudpuppies retain bushy red external gills all their lives.', synthType: 'bark' },
+            { id: 'caecilian', name: 'Caecilian', sciName: 'Gymnophiona', category: 'Amphibians', emoji: '🪱', soundDesc: 'Click Sound', fact: 'Caecilians are limbless amphibians that burrow underground.', synthType: 'hiss' },
+            { id: 'spadefoot', name: 'Spadefoot Toad', sciName: 'Scaphiopodidae', category: 'Amphibians', emoji: '🐸', soundDesc: 'Groan Call', fact: 'Spadefoot toads stay buried underground for dry months.', synthType: 'ribbit' },
 
-            // Small Mammals
-            { id: 99, name: "Hedgehog", emoji: "🦔", category: "Small Mammals", synthType: "sniff" },
-            { id: 100, name: "Bat", emoji: "🦇", category: "Small Mammals", synthType: "squeak" },
-            { id: 101, name: "Skunk", emoji: "🦨", category: "Small Mammals", synthType: "hiss" },
-            { id: 102, name: "Beaver", emoji: "🦫", category: "Small Mammals", synthType: "slap" },
-            { id: 103, name: "Hamster", emoji: "🐹", category: "Small Mammals", synthType: "squeak" },
-            { id: 104, name: "Mouse", emoji: "🐭", category: "Small Mammals", synthType: "squeak" },
-            { id: 105, name: "Squirrel", emoji: "🐿️", category: "Small Mammals", synthType: "chitter" },
-            { id: 106, name: "Mole", emoji: "🦦", category: "Small Mammals", synthType: "dig" },
-            { id: 107, name: "Badger", emoji: "🦡", category: "Small Mammals", synthType: "growl" },
-            { id: 108, name: "Raccoon", emoji: "🦝", category: "Small Mammals", synthType: "chatter" },
-            { id: 109, name: "Meerkat", emoji: "🦦", category: "Small Mammals", synthType: "bark" },
-            { id: 110, name: "Lemur", emoji: "🐒", category: "Small Mammals", synthType: "call" },
-            { id: 111, name: "Chipmunk", emoji: "🐿️", category: "Small Mammals", synthType: "chip" },
-            { id: 112, name: "Guinea Pig", emoji: "🐹", category: "Small Mammals", synthType: "wheek" },
-            { id: 113, name: "Ferrets", emoji: "🦦", category: "Small Mammals", synthType: "dook" },
-            { id: 114, name: "Chinchilla", emoji: "🐭", category: "Small Mammals", synthType: "bark" }
+            // Insects (15)
+            { id: 'bee', name: 'Honey Bee', sciName: 'Apis mellifera', category: 'Insects', emoji: '🐝', soundDesc: 'Busy Buzz', fact: 'Bees perform a dance to signal flower locations.', synthType: 'buzz' },
+            { id: 'cricket', name: 'Field Cricket', sciName: 'Gryllidae', category: 'Insects', emoji: '🦗', soundDesc: 'Night Chirp', fact: 'Cricket chirps correlate directly to outdoor temperature.', synthType: 'chirp' },
+            { id: 'cicada', name: 'Periodical Cicada', sciName: 'Magicicada', category: 'Insects', emoji: '🪰', soundDesc: 'Loud Humming', fact: 'Cicadas can produce sounds exceeding 100 decibels.', synthType: 'buzz' },
+            { id: 'mosquito', name: 'Mosquito', sciName: 'Culicidae', category: 'Insects', emoji: '🦟', soundDesc: 'High Whine', fact: 'Only female mosquitoes bite to gain proteins for eggs.', synthType: 'buzz' },
+            { id: 'fly', name: 'House Fly', sciName: 'Musca domestica', category: 'Insects', emoji: '🪰', soundDesc: 'Wing Buzz', fact: 'Flies beat wings 200 times per second during flight.', synthType: 'buzz' },
+            { id: 'dragonfly', name: 'Dragonfly', sciName: 'Anisoptera', category: 'Insects', emoji: '🦞', soundDesc: 'Flutter Sound', fact: 'Dragonflies capture prey in mid-air with 95% success rate.', synthType: 'buzz' },
+            { id: 'grasshopper', name: 'Grasshopper', sciName: 'Caelifera', category: 'Insects', emoji: '🦗', soundDesc: 'Snap Stridulation', fact: 'Grasshoppers rub legs against wings to produce chirps.', synthType: 'chirp' },
+            { id: 'beetle', name: 'Stag Beetle', sciName: 'Lucanidae', category: 'Insects', emoji: '🪲', soundDesc: 'Hissing Buzz', fact: 'Stag beetle mandibles are used to wrestle rivals.', synthType: 'hiss' },
+            { id: 'ant', name: 'Harvester Ant', sciName: 'Pogonomyrmex', category: 'Insects', emoji: '🐜', soundDesc: 'Stridulation', fact: 'Ants communicate through chemical pheromones and vibrations.', synthType: 'hiss' },
+            { id: 'wasp', name: 'Paper Wasp', sciName: 'Polistes', category: 'Insects', emoji: '🐝', soundDesc: 'Sharp Buzz', fact: 'Paper wasps construct nests out of chewed wood pulp.', synthType: 'buzz' },
+            { id: 'hornet', name: 'Giant Hornet', sciName: 'Vespa mandarinia', category: 'Insects', emoji: '🐝', soundDesc: 'Deep Drone', fact: 'Hornets defend colonies aggressively against intruders.', synthType: 'buzz' },
+            { id: 'moth', name: 'Hawk Moth', sciName: 'Sphingidae', category: 'Insects', emoji: '🦋', soundDesc: 'Ultrasonic Click', fact: 'Moths produce ultrasonic sounds to jam bat echolocation.', synthType: 'chirp' },
+            { id: 'butterfly', name: 'Monarch Butterfly', sciName: 'Danaus plexippus', category: 'Insects', emoji: '🦋', soundDesc: 'Soft Flutter', fact: 'Monarchs migrate thousands of miles each autumn.', synthType: 'buzz' },
+            { id: 'mantis', name: 'Praying Mantis', sciName: 'Mantodea', category: 'Insects', emoji: '🦗', soundDesc: 'Hissing Threat', fact: 'Praying mantises turn heads 180 degrees to scan areas.', synthType: 'hiss' },
+            { id: 'katydid', name: 'Katydid', sciName: 'Tettigoniidae', category: 'Insects', emoji: '🦗', soundDesc: 'Katy-Did Call', fact: 'Katydid ears are located on their front legs.', synthType: 'chirp' }
         ];
 
-        // --- STREAMING_CHUNK:Initializing state management and UI selectors... ---
-        // State variables
-        let recordedAudioUrls = {}; // animal.id -> Blob URL
-        let currentPlayingId = null;
-        let currentAudioObject = null;
-        let activeCategory = "All";
-        let searchQuery = "";
-        let currentView = "grid";
+        // Categories list
+        const categories = ['All', 'Farm', 'Safari', 'Pets', 'Birds', 'Wild', 'Aquatic', 'Reptiles', 'Amphibians', 'Insects'];
 
-        // Recording State Variables
+        let selectedCategory = 'All';
+        let searchQuery = '';
+        let currentlyPlayingId = null;
+        let recordedAudioUrls = {};
         let activeRecordAnimalId = null;
+
         let mediaRecorder = null;
-        let recordedChunks = [];
+        let audioChunks = [];
         let isRecording = false;
-        let tempRecordedBlob = null;
         let timerInterval = null;
         let recordingSeconds = 0;
+        let tempRecordedBlob = null;
+        let currentFx = 'normal';
 
-        // UI Categories mapping
-        const categoryColors = {
-            "Farm & Domestic": "bg-amber-100 text-amber-800 border-amber-200",
-            "Wild & Safari": "bg-orange-100 text-orange-800 border-orange-200",
-            "Birds": "bg-sky-100 text-sky-800 border-sky-200",
-            "Ocean & Marine": "bg-blue-100 text-blue-800 border-blue-200",
-            "Reptiles & Amphibians": "bg-emerald-100 text-emerald-800 border-emerald-200",
-            "Insects & Bugs": "bg-yellow-100 text-yellow-800 border-yellow-200",
-            "Dinosaurs & Fantasy": "bg-purple-100 text-purple-800 border-purple-200",
-            "Australia & Asia": "bg-rose-100 text-rose-800 border-rose-200",
-            "Small Mammals": "bg-teal-100 text-teal-800 border-teal-200"
-        };
+        let db;
 
-        // DOM elements
-        const gridViewEl = document.getElementById("grid-view");
-        const tableViewEl = document.getElementById("table-view");
-        const tableBodyEl = document.getElementById("table-body");
-        const noResultsEl = document.getElementById("no-results");
-        const searchInputEl = document.getElementById("search-input");
-        const categoryPillsEl = document.getElementById("category-pills");
-        const statShowingEl = document.getElementById("stat-showing");
-        const viewGridBtn = document.getElementById("view-grid-btn");
-        const viewTableBtn = document.getElementById("view-table-btn");
-
-        // --- STREAMING_CHUNK:Rendering dynamic UI views (Grid & Table)... ---
-        function filterAnimals() {
-            return animalsData.filter(animal => {
-                const matchesCategory = activeCategory === "All" || animal.category === activeCategory;
-                const matchesQuery = animal.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                     animal.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                     animal.id.toString() === searchQuery.trim();
-                return matchesCategory && matchesQuery;
+        function initDB() {
+            return new Promise((resolve) => {
+                const request = indexedDB.open("AnimalSoundsDB", 1);
+                request.onupgradeneeded = (e) => {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains("recordings")) {
+                        database.createObjectStore("recordings");
+                    }
+                };
+                request.onsuccess = (e) => {
+                    db = e.target.result;
+                    loadSavedRecordings().then(resolve);
+                };
+                request.onerror = () => resolve();
             });
         }
 
-        function renderList() {
-            const filtered = filterAnimals();
-            statShowingEl.textContent = filtered.length;
-
-            if (filtered.length === 0) {
-                gridViewEl.classList.add("hidden");
-                tableViewEl.classList.add("hidden");
-                noResultsEl.classList.remove("hidden");
-                return;
-            }
-
-            noResultsEl.classList.add("hidden");
-
-            if (currentView === "grid") {
-                gridViewEl.classList.remove("hidden");
-                tableViewEl.classList.add("hidden");
-                
-                gridViewEl.innerHTML = filtered.map(animal => {
-                    const isPlaying = animal.id === currentPlayingId;
-                    const hasVoice = !!recordedAudioUrls[animal.id];
-                    
-                    return `
-                        <div onclick='handleCardClick(${JSON.stringify(animal)})' 
-                            class="animal-card ${isPlaying ? 'playing-glow bg-sky-50' : 'glass-card'} cursor-pointer rounded-2xl p-4 flex flex-col items-center text-center relative border transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
-                            
-                            <span class="absolute top-3 left-3 text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
-                                #${animal.id}
-                            </span>
-
-                            ${hasVoice ? `
-                                <button onclick="openRecordModal(event, ${animal.id})" title="Re-record voice"
-                                    class="absolute top-3 right-3 text-[10px] font-bold bg-rose-100 hover:bg-rose-200 text-rose-700 px-2 py-0.5 rounded-md flex items-center gap-1 transition-colors shadow-sm">
-                                    <i class="fa-solid fa-microphone-lines"></i>
-                                    <span>Redo</span>
-                                </button>
-                            ` : `
-                                <button onclick="playOriginalSound(event, ${JSON.stringify(animal)})" title="Play original sound"
-                                    class="absolute top-3 right-3 text-[10px] font-bold bg-sky-100 hover:bg-sky-200 text-sky-700 px-2 py-0.5 rounded-md flex items-center gap-1 transition-colors shadow-sm">
-                                    <i class="fa-solid fa-volume-low"></i>
-                                    <span>Original</span>
-                                </button>
-                            `}
-                            
-                            <div class="text-4xl sm:text-5xl my-3 emoji-shadow select-none">
-                                ${animal.emoji}
-                            </div>
-                            
-                            <h3 class="font-extrabold text-sm sm:text-base text-slate-800 leading-tight mb-1">
-                                ${animal.name}
-                            </h3>
-
-                            ${hasVoice ? `
-                                <span class="text-[9px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 mb-2">
-                                    🎙️ Voice Recorded
-                                </span>
-                            ` : `
-                                <span class="text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${categoryColors[animal.category] || 'bg-slate-100 text-slate-700'} mb-2">
-                                    ${animal.category}
-                                </span>
-                            `}
-
-                            ${hasVoice ? `
-                                <button onclick="playAnimalSound(event, ${JSON.stringify(animal)})" class="w-full mt-auto py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 active:scale-95">
-                                    <i class="fa-solid ${isPlaying ? 'fa-volume-high animate-bounce' : 'fa-play'}"></i>
-                                    <span>${isPlaying ? 'Playing Voice...' : 'Play My Voice'}</span>
-                                </button>
-                            ` : `
-                                <button onclick="openRecordModal(event, ${animal.id})" class="w-full mt-auto py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 active:scale-95">
-                                    <i class="fa-solid fa-microphone"></i>
-                                    <span>Record Your Voice</span>
-                                </button>
-                            `}
-                        </div>
-                    `;
-                }).join("");
-            } else {
-                gridViewEl.classList.add("hidden");
-                tableViewEl.classList.remove("hidden");
-
-                tableBodyEl.innerHTML = filtered.map(animal => {
-                    const isPlaying = animal.id === currentPlayingId;
-                    const hasVoice = !!recordedAudioUrls[animal.id];
-                    return `
-                        <tr onclick='handleCardClick(${JSON.stringify(animal)})' class="cursor-pointer hover:bg-sky-50/70 ${isPlaying ? 'bg-sky-100/60' : ''} transition-colors">
-                            <td class="py-3 px-4 text-center font-bold text-slate-400 text-xs">#${animal.id}</td>
-                            <td class="py-3 px-4 text-center text-2xl select-none">${animal.emoji}</td>
-                            <td class="py-3 px-4 font-bold text-slate-800">
-                                ${animal.name}
-                                ${hasVoice ? '<span class="ml-2 text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">🎙️ My Voice</span>' : ''}
-                            </td>
-                            <td class="py-3 px-4">
-                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full border ${categoryColors[animal.category] || 'bg-slate-100 text-slate-700'}">
-                                    ${animal.category}
-                                </span>
-                            </td>
-                            <td class="py-3 px-4 text-center">
-                                <div class="flex items-center justify-center gap-2">
-                                    ${hasVoice ? `
-                                        <button onclick="playAnimalSound(event, ${JSON.stringify(animal)})" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm">
-                                            <i class="fa-solid ${isPlaying ? 'fa-volume-high animate-bounce' : 'fa-play'}"></i>
-                                            <span>${isPlaying ? 'Playing...' : 'Play Voice'}</span>
-                                        </button>
-                                        <button onclick="openRecordModal(event, ${animal.id})" title="Redo Voice" class="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 hover:bg-rose-200 inline-flex items-center justify-center text-xs transition-colors">
-                                            <i class="fa-solid fa-microphone-lines"></i>
-                                        </button>
-                                    ` : `
-                                        <button onclick="openRecordModal(event, ${animal.id})" class="px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm">
-                                            <i class="fa-solid fa-microphone"></i>
-                                            <span>Record Voice</span>
-                                        </button>
-                                        <button onclick="playOriginalSound(event, ${JSON.stringify(animal)})" title="Play Original Sound" class="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 hover:bg-sky-200 inline-flex items-center justify-center text-xs transition-colors">
-                                            <i class="fa-solid fa-volume-low"></i>
-                                        </button>
-                                    `}
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }).join("");
-            }
+        async function saveRecordingToDB(animalId, blob) {
+            if (!db) return;
+            const transaction = db.transaction(["recordings"], "readwrite");
+            const store = transaction.objectStore("recordings");
+            store.put(blob, animalId);
         }
 
-        // --- STREAMING_CHUNK:Implementing category filter buttons... ---
+        async function loadSavedRecordings() {
+            if (!db) return;
+            return new Promise((resolve) => {
+                const transaction = db.transaction(["recordings"], "readonly");
+                const store = transaction.objectStore("recordings");
+                const request = store.openCursor();
+                request.onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    if (cursor) {
+                        const blob = cursor.value;
+                        recordedAudioUrls[cursor.key] = URL.createObjectURL(blob);
+                        cursor.continue();
+                    } else {
+                        resolve();
+                    }
+                };
+                request.onerror = () => resolve();
+            });
+        }
+
         function renderCategories() {
-            const categories = ["All", ...new Set(animalsData.map(a => a.category))];
-            categoryPillsEl.innerHTML = categories.map(cat => {
-                const isActive = cat === activeCategory;
+            const container = document.getElementById('category-chips');
+            container.innerHTML = categories.map(cat => {
+                const isActive = selectedCategory === cat;
+                const count = cat === 'All' ? animalsData.length : animalsData.filter(a => a.category === cat).length;
                 return `
                     <button onclick="setCategory('${cat}')" 
-                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shadow-sm ${
+                        class="px-4 py-2 rounded-2xl text-xs font-extrabold transition-all whitespace-nowrap active:scale-95 flex items-center gap-1.5 ${
                             isActive 
-                            ? 'bg-sky-600 text-white shadow-sky-200' 
-                            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                            ? 'bg-slate-900 text-white shadow-md' 
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }">
-                        ${cat}
+                        <span>${cat}</span>
+                        <span class="text-[10px] opacity-75 bg-slate-700/20 px-1.5 py-0.2 rounded-full font-mono">${count}</span>
                     </button>
                 `;
-            }).join("");
+            }).join('');
         }
 
         function setCategory(cat) {
-            activeCategory = cat;
+            selectedCategory = cat;
             renderCategories();
             renderList();
         }
 
-        // --- STREAMING_CHUNK:Implementing card clicks and audio playback functions... ---
-        function updateAudioBanner(animal, textStatus) {
-            document.getElementById("banner-emoji").textContent = animal.emoji;
-            document.getElementById("banner-title").textContent = `${animal.name} (${animal.category})`;
-            document.getElementById("banner-subtitle").textContent = textStatus;
-            
-            const bars = document.querySelectorAll(".wave-bar");
-            bars.forEach(b => b.classList.add("active"));
-        }
-
-        function clearAudioBanner() {
-            const bars = document.querySelectorAll(".wave-bar");
-            bars.forEach(b => b.classList.remove("active"));
-            currentPlayingId = null;
+        function handleSearch() {
+            searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
             renderList();
         }
 
-        function handleCardClick(animal) {
-            if (recordedAudioUrls[animal.id]) {
-                playAnimalSound(null, animal);
-            } else {
-                openRecordModal(null, animal.id);
-            }
+        function resetFilters() {
+            selectedCategory = 'All';
+            searchQuery = '';
+            document.getElementById('search-input').value = '';
+            renderCategories();
+            renderList();
         }
 
-        function playAnimalSound(e, animal, allowRecordModal = true) {
-            if (e && e.stopPropagation) e.stopPropagation();
+        function renderList() {
+            const grid = document.getElementById('animals-grid');
+            const emptyState = document.getElementById('empty-state');
 
-            if (!recordedAudioUrls[animal.id]) {
-                if (allowRecordModal) {
-                    openRecordModal(e, animal.id);
-                    return;
-                } else {
-                    playOriginalSound(e, animal);
-                    return;
-                }
-            }
-
-            if (currentAudioObject) {
-                currentAudioObject.pause();
-                currentAudioObject = null;
-            }
-
-            currentPlayingId = animal.id;
-            renderList();
-            updateAudioBanner(animal, "🎙️ My Recorded Voice");
-
-            const audio = new Audio();
-            currentAudioObject = audio;
-            audio.src = recordedAudioUrls[animal.id];
-
-            audio.play().then(() => {
-                audio.onended = () => clearAudioBanner();
-            }).catch((err) => {
-                console.warn("Recorded audio playback error:", err);
-                clearAudioBanner();
+            const filtered = animalsData.filter(animal => {
+                const matchesCat = selectedCategory === 'All' || animal.category === selectedCategory;
+                const matchesSearch = !searchQuery || 
+                    animal.name.toLowerCase().includes(searchQuery) || 
+                    animal.sciName.toLowerCase().includes(searchQuery) ||
+                    animal.soundDesc.toLowerCase().includes(searchQuery) ||
+                    animal.category.toLowerCase().includes(searchQuery);
+                return matchesCat && matchesSearch;
             });
-        }
 
-        function playOriginalSound(e, animal) {
-            if (e && e.stopPropagation) e.stopPropagation();
-            if (currentAudioObject) {
-                currentAudioObject.pause();
-                currentAudioObject = null;
+            document.getElementById('animal-count-badge').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
             }
 
-            currentPlayingId = animal.id;
-            renderList();
-            updateAudioBanner(animal, "Original Synthesized Sound");
-            fallbackToSynthesis(animal);
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = filtered.map(animal => {
+                const isPlaying = currentlyPlayingId === animal.id;
+                const hasCustomVoice = !!recordedAudioUrls[animal.id];
+
+                return `
+                    <div class="bg-white rounded-3xl p-5 border border-slate-200/80 card-hover-effect flex flex-col justify-between relative overflow-hidden group">
+                        ${hasCustomVoice ? `
+                            <span class="absolute top-3.5 right-3.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-microphone text-amber-600"></i> Custom
+                            </span>
+                        ` : ''}
+
+                        <div>
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="text-4xl p-2.5 bg-slate-50 rounded-2xl group-hover:scale-110 transition duration-300 select-none">
+                                    ${animal.emoji}
+                                </div>
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 text-base leading-tight">${animal.name}</h3>
+                                    <p class="text-[11px] italic font-medium text-slate-400">${animal.sciName}</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-1.5 flex-wrap mb-4">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                                    ${animal.category}
+                                </span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700">
+                                    <i class="fa-solid fa-music mr-1 text-[9px]"></i>${animal.soundDesc}
+                                </span>
+                            </div>
+
+                            <p class="text-xs text-slate-500 bg-slate-50 rounded-2xl p-3 border border-slate-100 leading-relaxed mb-4">
+                                <span class="font-bold text-slate-700">Did you know?</span> ${animal.fact}
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+                            <button onclick="playAnimalSound('${animal.id}')" 
+                                class="flex-1 py-2.5 px-3 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95 ${
+                                    isPlaying 
+                                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-500/50' 
+                                    : 'btn-gradient-primary text-white'
+                                }">
+                                ${isPlaying ? `
+                                    <div class="flex items-center gap-1 h-4">
+                                        <span class="w-1 bg-white animate-wave-bar-1"></span>
+                                        <span class="w-1 bg-white animate-wave-bar-2"></span>
+                                        <span class="w-1 bg-white animate-wave-bar-3"></span>
+                                    </div>
+                                    <span>Playing...</span>
+                                ` : `
+                                    <i class="fa-solid fa-circle-play text-sm"></i>
+                                    <span>${hasCustomVoice ? 'Play Custom' : 'Play Sound'}</span>
+                                `}
+                            </button>
+
+                            <button onclick="openRecordModal('${animal.id}')" title="Record Custom Sound"
+                                class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition active:scale-95 border border-slate-200 flex items-center justify-center">
+                                <i class="fa-solid fa-microphone text-rose-500 text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        // --- STREAMING_CHUNK:Implementing Web Audio API synthesized sound generator... ---
         function fallbackToSynthesis(animal) {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                
                 const now = ctx.currentTime;
-                
-                // Frequency logic by animal preset
-                if (animal.synthType === "moo" || animal.name === "Cow") {
-                    osc.type = "sawtooth";
-                    osc.frequency.setValueAtTime(140, now);
-                    osc.frequency.exponentialRampToValueAtTime(100, now + 1.2);
+
+                const createNoiseBuffer = () => {
+                    const bufferSize = ctx.sampleRate * 1.5;
+                    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                    const output = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        output[i] = Math.random() * 2 - 1;
+                    }
+                    return buffer;
+                };
+
+                const type = animal.synthType || 'chirp';
+
+                if (type === 'moo') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(130, now);
+                    osc.frequency.exponentialRampToValueAtTime(95, now + 1.2);
                     gain.gain.setValueAtTime(0.4, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 1.2);
-                    osc.start(now);
-                    osc.stop(now + 1.2);
-                } else if (animal.synthType === "bark" || animal.name === "Dog") {
-                    osc.type = "triangle";
-                    osc.frequency.setValueAtTime(300, now);
-                    osc.frequency.exponentialRampToValueAtTime(120, now + 0.25);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 1.2);
+                } else if (type === 'bark') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(110, now + 0.25);
                     gain.gain.setValueAtTime(0.5, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                    osc.start(now);
-                    osc.stop(now + 0.25);
-                } else if (animal.synthType === "meow" || animal.name === "Cat") {
-                    osc.type = "sine";
-                    osc.frequency.setValueAtTime(550, now);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.25);
+                } else if (type === 'meow') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(500, now);
                     osc.frequency.exponentialRampToValueAtTime(750, now + 0.3);
                     osc.frequency.exponentialRampToValueAtTime(350, now + 0.7);
                     gain.gain.setValueAtTime(0.3, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
-                    osc.start(now);
-                    osc.stop(now + 0.7);
-                } else {
-                    // Default generic bird/chirp sound
-                    osc.type = "sine";
-                    osc.frequency.setValueAtTime(600, now);
-                    osc.frequency.exponentialRampToValueAtTime(300, now + 0.4);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.7);
+                } else if (type === 'roar') {
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = createNoiseBuffer();
+                    const filter = ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(250, now);
+                    filter.frequency.exponentialRampToValueAtTime(800, now + 0.5);
+                    filter.frequency.exponentialRampToValueAtTime(150, now + 1.4);
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0.6, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 1.4);
+                    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+                    noise.start(now); noise.stop(now + 1.4);
+                } else if (type === 'trumpet') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(580, now + 0.4);
+                    osc.frequency.exponentialRampToValueAtTime(420, now + 1.0);
+                    gain.gain.setValueAtTime(0.5, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 1.0);
+                } else if (type === 'howl') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(650, now + 0.6);
+                    osc.frequency.exponentialRampToValueAtTime(380, now + 1.6);
+                    gain.gain.setValueAtTime(0.35, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 1.6);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 1.6);
+                } else if (type === 'quack') {
+                    const osc = ctx.createOscillator();
+                    const filter = ctx.createBiquadFilter();
+                    const gain = ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.35);
+                    filter.type = 'bandpass';
+                    filter.frequency.setValueAtTime(750, now);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.35);
+                } else if (type === 'ribbit') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(160, now);
+                    osc.frequency.exponentialRampToValueAtTime(90, now + 0.3);
+                    gain.gain.setValueAtTime(0.5, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.3);
+                } else if (type === 'hiss') {
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = createNoiseBuffer();
+                    const filter = ctx.createBiquadFilter();
+                    filter.type = 'highpass';
+                    filter.frequency.setValueAtTime(3000, now);
+                    const gain = ctx.createGain();
                     gain.gain.setValueAtTime(0.3, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-                    osc.start(now);
-                    osc.stop(now + 0.4);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+                    noise.start(now); noise.stop(now + 0.8);
+                } else if (type === 'buzz') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(190, now);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.7);
+                } else if (type === 'hoot') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(340, now);
+                    osc.frequency.exponentialRampToValueAtTime(260, now + 0.5);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.5);
+                } else if (type === 'whalesong') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(160, now);
+                    osc.frequency.exponentialRampToValueAtTime(380, now + 0.8);
+                    osc.frequency.exponentialRampToValueAtTime(120, now + 1.8);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 1.8);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 1.8);
+                } else {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1200, now);
+                    osc.frequency.exponentialRampToValueAtTime(2400, now + 0.15);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.35);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.35);
                 }
-                
-                setTimeout(() => {
-                    clearAudioBanner();
-                }, 800);
             } catch (err) {
-                console.warn("Synthesis failed:", err);
-                clearAudioBanner();
+                console.warn("Synthesis fallback failed:", err);
             }
         }
 
-        // --- STREAMING_CHUNK:Implementing MediaRecorder API voice recording studio... ---
-        function openRecordModal(e, animalId) {
-            if (e && e.stopPropagation) e.stopPropagation();
+        let currentAudio = null;
+
+        function playAnimalSound(animalId) {
             const animal = animalsData.find(a => a.id === animalId);
             if (!animal) return;
 
-            activeRecordAnimalId = animal.id;
-            document.getElementById("modal-emoji").textContent = animal.emoji;
-            document.getElementById("modal-title").textContent = `Record ${animal.name} Sound`;
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+
+            currentlyPlayingId = animalId;
+            renderList();
+
+            if (recordedAudioUrls[animalId]) {
+                currentAudio = new Audio(recordedAudioUrls[animalId]);
+                currentAudio.play().then(() => {
+                    showToast(`Playing custom recorded voice for ${animal.name}! 🎙️`);
+                }).catch(() => fallbackToSynthesis(animal));
+
+                currentAudio.onended = () => {
+                    currentlyPlayingId = null;
+                    renderList();
+                };
+            } else {
+                fallbackToSynthesis(animal);
+                setTimeout(() => {
+                    currentlyPlayingId = null;
+                    renderList();
+                }, 1200);
+            }
+        }
+
+        function playRandomSound() {
+            const randomAnimal = animalsData[Math.floor(Math.random() * animalsData.length)];
+            playAnimalSound(randomAnimal.id);
+            showToast(`Surprise! Playing ${randomAnimal.name} sound ${randomAnimal.emoji}`);
+        }
+
+        function openRecordModal(animalId) {
+            activeRecordAnimalId = animalId;
+            const animal = animalsData.find(a => a.id === animalId);
             
-            resetRecordingUI();
-            document.getElementById("record-modal").classList.remove("hidden");
+            document.getElementById('modal-animal-emoji').textContent = animal.emoji;
+            document.getElementById('modal-animal-name').textContent = `Record ${animal.name} Voice`;
+            document.getElementById('record-modal').classList.remove('hidden');
+            
+            resetRecordingState();
         }
 
         function closeRecordModal() {
             if (isRecording) stopRecording();
-            document.getElementById("record-modal").classList.add("hidden");
+            document.getElementById('record-modal').classList.add('hidden');
+            activeRecordAnimalId = null;
         }
 
-        function resetRecordingUI() {
+        function resetRecordingState() {
             recordingSeconds = 0;
-            document.getElementById("timer-display").textContent = "00:00";
-            document.getElementById("mic-status-badge").className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700";
-            document.getElementById("mic-status-text").textContent = "Microphone Ready";
-            document.getElementById("record-action-btn").className = "w-full py-3.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm transition shadow-lg flex items-center justify-center gap-2 active:scale-98";
-            document.getElementById("record-btn-text").textContent = "Start Recording";
-            document.getElementById("recording-preview").classList.add("hidden");
-            document.getElementById("recorded-options").classList.add("hidden");
             tempRecordedBlob = null;
+            document.getElementById('timer-display').textContent = '00:00';
+            document.getElementById('save-rec-btn').disabled = true;
+            document.getElementById('save-rec-btn').className = "flex-1 py-3.5 px-4 rounded-2xl bg-slate-200 text-slate-400 font-bold text-xs transition flex items-center justify-center gap-2 cursor-not-allowed";
+            document.getElementById('recording-preview').classList.add('hidden');
+            document.getElementById('voice-fx-container').classList.add('hidden');
+            document.getElementById('mic-status-badge').className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700";
+            document.getElementById('mic-status-text').textContent = "Microphone Ready";
+            setVoiceFx('normal');
         }
 
-        async function toggleRecordState() {
-            if (!isRecording) {
-                startRecording();
-            } else {
-                stopRecording();
-            }
+        async function toggleRecording() {
+            if (!isRecording) startRecording();
+            else stopRecording();
         }
 
         async function startRecording() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                recordedChunks = [];
                 mediaRecorder = new MediaRecorder(stream);
-                
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) recordedChunks.push(event.data);
-                };
+                audioChunks = [];
 
-                mediaRecorder.onstop = () => {
-                    tempRecordedBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+                mediaRecorder.ondataavailable = (event) => audioChunks.push(event.data);
+
+                mediaRecorder.onstop = async () => {
+                    tempRecordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
                     const audioUrl = URL.createObjectURL(tempRecordedBlob);
-                    const previewAudio = document.getElementById("recording-preview");
-                    previewAudio.src = audioUrl;
-                    previewAudio.classList.remove("hidden");
-                    document.getElementById("recorded-options").classList.remove("hidden");
                     
-                    document.getElementById("mic-status-badge").className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200";
-                    document.getElementById("mic-status-text").textContent = "Recording Complete!";
-                    document.getElementById("record-action-btn").classList.add("hidden");
+                    const preview = document.getElementById('recording-preview');
+                    preview.src = audioUrl;
+                    preview.classList.remove('hidden');
+
+                    document.getElementById('voice-fx-container').classList.remove('hidden');
+                    document.getElementById('save-rec-btn').disabled = false;
+                    document.getElementById('save-rec-btn').className = "flex-1 py-3.5 px-4 rounded-2xl btn-gradient-primary text-white font-bold text-xs transition active:scale-95 shadow-md flex items-center justify-center gap-2";
                 };
 
                 mediaRecorder.start();
                 isRecording = true;
 
-                // UI update during recording
-                document.getElementById("mic-status-badge").className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 animate-pulse border border-rose-200";
-                document.getElementById("mic-status-text").textContent = "Recording Live...";
-                document.getElementById("record-action-btn").className = "w-full py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm transition shadow-lg flex items-center justify-center gap-2 active:scale-98";
-                document.getElementById("record-btn-text").textContent = "Stop Recording";
+                document.getElementById('record-btn').className = "w-14 h-14 rounded-2xl bg-slate-900 text-white text-xl shadow-lg flex items-center justify-center transition active:scale-95 animate-pulse-ring";
+                document.getElementById('record-btn').innerHTML = '<i class="fa-solid fa-square text-rose-500"></i>';
+                
+                document.getElementById('mic-status-badge').className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200";
+                document.getElementById('mic-status-text').textContent = "Recording Live...";
 
                 recordingSeconds = 0;
                 timerInterval = setInterval(() => {
                     recordingSeconds++;
-                    const secs = String(recordingSeconds % 60).padStart(2, '0');
                     const mins = String(Math.floor(recordingSeconds / 60)).padStart(2, '0');
-                    document.getElementById("timer-display").textContent = `${mins}:${secs}`;
+                    const secs = String(recordingSeconds % 60).padStart(2, '0');
+                    document.getElementById('timer-display').textContent = `${mins}:${secs}`;
                 }, 1000);
 
             } catch (err) {
-                showToast("Microphone access denied or unavailable");
-                console.error("Mic error:", err);
+                showToast("Microphone access denied or not supported in browser.");
             }
         }
 
@@ -787,105 +816,194 @@
                 mediaRecorder.stream.getTracks().forEach(track => track.stop());
                 isRecording = false;
                 clearInterval(timerInterval);
+
+                document.getElementById('record-btn').className = "w-14 h-14 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white text-xl shadow-lg flex items-center justify-center transition active:scale-95";
+                document.getElementById('record-btn').innerHTML = '<i class="fa-solid fa-microphone"></i>';
+                
+                document.getElementById('mic-status-badge').className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200";
+                document.getElementById('mic-status-text').textContent = "Recording Complete!";
             }
         }
 
-        function resetRecording() {
-            document.getElementById("record-action-btn").classList.remove("hidden");
-            resetRecordingUI();
+        function setVoiceFx(fx) {
+            currentFx = fx;
+            document.querySelectorAll('.fx-btn').forEach(btn => {
+                btn.className = "fx-btn text-xs font-bold py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 transition text-center";
+            });
+            const activeBtn = document.getElementById(`fx-${fx}`);
+            if (activeBtn) {
+                activeBtn.className = "fx-btn active-fx text-xs font-bold py-2 rounded-xl bg-blue-600 text-white transition text-center shadow-sm";
+            }
         }
 
-        function saveRecording() {
+        async function saveRecording() {
             if (!tempRecordedBlob || !activeRecordAnimalId) return;
-            const audioUrl = URL.createObjectURL(tempRecordedBlob);
+
+            let finalBlob = tempRecordedBlob;
+
+            if (currentFx !== 'normal') {
+                try {
+                    finalBlob = await applyAudioFx(tempRecordedBlob, currentFx);
+                } catch (e) {
+                    console.warn("Audio FX fallback:", e);
+                }
+            }
+
+            const audioUrl = URL.createObjectURL(finalBlob);
             recordedAudioUrls[activeRecordAnimalId] = audioUrl;
-            
+
+            await saveRecordingToDB(activeRecordAnimalId, finalBlob);
+
             const animal = animalsData.find(a => a.id === activeRecordAnimalId);
-            showToast(`Saved your voice for ${animal.name}! 🎙️`);
-            
+            showToast(`Saved custom voice for ${animal.name}! 🎙️`);
+
             closeRecordModal();
             renderList();
         }
 
-        // --- STREAMING_CHUNK:Implementing helper utilities (Clipboard, Toast, Random Play)... ---
-        function copyListFormatted() {
-            const listText = animalsData.map(a => `${a.id}. ${a.emoji} ${a.name} (${a.category})`).join("\n");
-            
-            const tempTextArea = document.createElement("textarea");
-            tempTextArea.value = listText;
-            document.body.appendChild(tempTextArea);
-            tempTextArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempTextArea);
-            
-            showToast("Copied list of 114 animals to clipboard!");
-        }
+        async function applyAudioFx(blob, fx) {
+            const arrayBuffer = await blob.arrayBuffer();
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
 
-        function showToast(msg) {
-            const toast = document.getElementById("toast");
-            document.getElementById("toast-msg").textContent = msg;
-            toast.classList.remove("translate-y-16", "opacity-0");
-            toast.classList.add("translate-y-0", "opacity-100");
-            setTimeout(() => {
-                toast.classList.add("translate-y-16", "opacity-0");
-                toast.classList.remove("translate-y-0", "opacity-100");
-            }, 2600);
-        }
+            let rate = 1.0;
+            if (fx === 'chipmunk') rate = 1.6;
+            if (fx === 'monster') rate = 0.65;
 
-        // Setup event listeners
-        searchInputEl.addEventListener("input", (e) => {
-            searchQuery = e.target.value;
-            renderList();
-        });
+            const offlineCtx = new OfflineAudioContext(
+                audioBuffer.numberOfChannels,
+                Math.max(1, audioBuffer.duration * ctx.sampleRate / rate),
+                ctx.sampleRate
+            );
 
-        viewGridBtn.addEventListener("click", () => {
-            currentView = "grid";
-            viewGridBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-sky-600 shadow-sm flex items-center gap-1";
-            viewTableBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1";
-            renderList();
-        });
+            const source = offlineCtx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.playbackRate.value = rate;
 
-        viewTableBtn.addEventListener("click", () => {
-            currentView = "table";
-            viewTableBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-sky-600 shadow-sm flex items-center gap-1";
-            viewGridBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1";
-            renderList();
-        });
-
-        document.getElementById("random-sound-btn").addEventListener("click", () => {
-            const filtered = filterAnimals();
-            if (filtered.length > 0) {
-                const randomAnimal = filtered[Math.floor(Math.random() * filtered.length)];
-                playAnimalSound(null, randomAnimal, false);
+            if (fx === 'echo') {
+                const delay = offlineCtx.createDelay();
+                delay.delayTime.value = 0.25;
+                const feedback = offlineCtx.createGain();
+                feedback.gain.value = 0.4;
+                source.connect(delay);
+                delay.connect(feedback);
+                feedback.connect(delay);
+                delay.connect(offlineCtx.destination);
             }
-        });
 
-        let playAllTimer = null;
-        document.getElementById("play-all-btn").addEventListener("click", () => {
-            const filtered = filterAnimals();
-            if (filtered.length === 0) return;
+            source.connect(offlineCtx.destination);
+            source.start(0);
 
-            let idx = 0;
-            showToast("Playing sequence of current view...");
+            const renderedBuffer = await offlineCtx.startRendering();
+            return audioBufferToWavBlob(renderedBuffer);
+        }
 
-            if (playAllTimer) clearInterval(playAllTimer);
+        function audioBufferToWavBlob(buffer) {
+            const numOfChan = buffer.numberOfChannels;
+            const length = buffer.length * numOfChan * 2 + 44;
+            const out = new DataView(new ArrayBuffer(length));
+            let channels = [], sample, offset = 0, pos = 0;
 
-            playAnimalSound(null, filtered[idx], false);
-            idx++;
+            function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
+            function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
 
-            playAllTimer = setInterval(() => {
-                if (idx >= filtered.length) {
-                    clearInterval(playAllTimer);
-                    showToast("Sequence completed!");
-                    return;
+            setUint32(0x46464952);
+            setUint32(length - 8);
+            setUint32(0x45564157);
+            setUint32(0x20746d66);
+            setUint32(16);
+            setUint16(1);
+            setUint16(numOfChan);
+            setUint32(buffer.sampleRate);
+            setUint32(buffer.sampleRate * 2 * numOfChan);
+            setUint16(numOfChan * 2);
+            setUint16(16);
+            setUint32(0x61746164);
+            setUint32(length - pos - 4);
+
+            for (let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+
+            while (offset < buffer.length) {
+                for (let i = 0; i < numOfChan; i++) {
+                    sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    out.setInt16(pos, sample, true);
+                    pos += 2;
                 }
-                playAnimalSound(null, filtered[idx], false);
-                idx++;
-            }, 1200);
-        });
+                offset++;
+            }
+            return new Blob([out], { type: "audio/wav" });
+        }
 
-        // Initial App setup on window load
-        window.onload = function() {
+        let quizCurrentAnimal = null;
+        let quizScore = 0;
+
+        function openQuizModal() {
+            document.getElementById('quiz-modal').classList.remove('hidden');
+            generateQuizQuestion();
+        }
+
+        function closeQuizModal() {
+            document.getElementById('quiz-modal').classList.add('hidden');
+        }
+
+        function generateQuizQuestion() {
+            const feedbackEl = document.getElementById('quiz-feedback');
+            feedbackEl.classList.add('hidden');
+
+            quizCurrentAnimal = animalsData[Math.floor(Math.random() * animalsData.length)];
+
+            const distractors = animalsData.filter(a => a.id !== quizCurrentAnimal.id);
+            distractors.sort(() => 0.5 - Math.random());
+            const options = [quizCurrentAnimal, ...distractors.slice(0, 3)];
+            options.sort(() => 0.5 - Math.random());
+
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = options.map(opt => `
+                <button onclick="handleQuizAnswer('${opt.id}')" 
+                    class="p-3.5 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 transition text-center flex flex-col items-center gap-1.5 active:scale-95 shadow-sm">
+                    <span class="text-3xl select-none">${opt.emoji}</span>
+                    <span class="text-xs font-extrabold text-slate-800">${opt.name}</span>
+                </button>
+            `).join('');
+
+            playQuizSound();
+        }
+
+        function playQuizSound() {
+            if (quizCurrentAnimal) playAnimalSound(quizCurrentAnimal.id);
+        }
+
+        function handleQuizAnswer(selectedId) {
+            const feedbackEl = document.getElementById('quiz-feedback');
+            feedbackEl.classList.remove('hidden');
+
+            if (selectedId === quizCurrentAnimal.id) {
+                quizScore += 10;
+                document.getElementById('quiz-score').textContent = quizScore;
+                feedbackEl.className = "mt-4 text-center text-xs font-extrabold p-3 rounded-2xl bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm";
+                feedbackEl.innerHTML = `🎉 Correct! That was the ${quizCurrentAnimal.name}! (+10 pts)`;
+                setTimeout(() => generateQuizQuestion(), 1400);
+            } else {
+                feedbackEl.className = "mt-4 text-center text-xs font-extrabold p-3 rounded-2xl bg-rose-100 text-rose-800 border border-rose-200 shadow-sm";
+                feedbackEl.innerHTML = `❌ Oops! That wasn't it. Listen again!`;
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = message;
+            toast.classList.remove('translate-y-16', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-16', 'opacity-0');
+            }, 3000);
+        }
+
+        window.onload = async function() {
+            await initDB();
             renderCategories();
             renderList();
         };
