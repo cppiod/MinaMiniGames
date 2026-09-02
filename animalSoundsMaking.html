@@ -122,31 +122,6 @@
                     </div>
                 </div>
 
-                <!-- Pagination Controls (moved from sidebar) -->
-                <div class="flex items-center justify-between mt-4">
-                    <div class="flex items-center gap-2.5">
-                        <label class="text-xs font-bold text-slate-600">Items per page:</label>
-                        <select id="pagination-select" onchange="handlePaginationChange()" class="px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 focus:ring-2 focus:ring-blue-500 focus:bg-white transition cursor-pointer">
-                            <option value="10">10</option>
-                            <option value="20" selected>20</option>
-                            <option value="30">30</option>
-                            <option value="50">50</option>
-                            <option value="all">All</option>
-                        </select>
-                    </div>
-                    <div id="pagination-info" class="text-xs font-medium text-slate-500 flex items-center gap-2">
-                        <span id="current-page-info">Page 1</span>
-                        <span id="total-pages-info"></span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button id="prev-page-btn" onclick="previousPage()" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <i class="fa-solid fa-chevron-left"></i> Prev
-                        </button>
-                        <button id="next-page-btn" onclick="nextPage()" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition disabled:opacity-50 disabled:cursor-not-allowed">
-                            <i class="fa-solid fa-chevron-right"></i> Next
-                        </button>
-                    </div>
-                </div>
             </div>
 
             <!-- Grid Status Header -->
@@ -157,6 +132,32 @@
                 </div>
                 <div class="text-xs text-slate-400 font-medium">
                     <i class="fa-solid fa-volume-high text-blue-500"></i> Click play to hear animal sound
+                </div>
+            </div>
+
+            <!-- Pagination Controls (under Results) -->
+            <div class="flex items-center justify-between mb-4 bg-white rounded-2xl p-3 border border-slate-200/80">
+                <div class="flex items-center gap-2.5">
+                    <label class="text-xs font-bold text-slate-600">Items per page:</label>
+                    <select id="pagination-select" onchange="handlePaginationChange()" class="px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 focus:ring-2 focus:ring-blue-500 focus:bg-white transition cursor-pointer">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                        <option value="all">All</option>
+                    </select>
+                </div>
+                <div id="pagination-info" class="text-xs font-medium text-slate-500 flex items-center gap-2">
+                    <span id="current-page-info">Page 1</span>
+                    <span id="total-pages-info"></span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="prev-page-btn" onclick="previousPage()" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fa-solid fa-chevron-left"></i> Prev
+                    </button>
+                    <button id="next-page-btn" onclick="nextPage()" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-chevron-right"></i> Next
+                    </button>
                 </div>
             </div>
 
