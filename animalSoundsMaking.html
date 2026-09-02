@@ -71,60 +71,110 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-2.5 flex-wrap">
-                <button onclick="openQuizModal()" class="btn-gradient-accent text-white px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95">
-                    <i class="fa-solid fa-trophy"></i>
-                    <span>Sound Quiz Game</span>
-                </button>
-                <button id="surprise-btn" onclick="playRandomSound()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95 border border-slate-200">
-                    <i class="fa-solid fa-dice text-amber-500"></i>
-                    <span>Surprise Me</span>
-                </button>
+            <div id="auth-controls" class="flex items-center gap-3">
+                <div id="user-greeting" class="text-sm text-slate-700 hidden"></div>
             </div>
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-        <!-- Search & Filter Controls -->
-        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 mb-6 space-y-4">
-            <div class="flex flex-col sm:flex-row gap-3">
-                <div class="relative flex-1">
-                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input type="text" id="search-input" placeholder="Search 114 animals, habitats, or sound effects..." oninput="handleSearch()"
-                        class="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-sm font-semibold text-slate-800 placeholder-slate-400 transition outline-none">
-                </div>
-                <button onclick="resetFilters()" class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center gap-2 transition">
+    <main class="flex-1 flex">
+        <!-- Left Sidebar -->
+        <aside class="w-64 bg-white border-r border-slate-200/80 overflow-y-auto p-5 space-y-6 hidden md:block">
+            <!-- Sidebar Header -->
+            <div class="space-y-3">
+                <h2 class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Filters & Controls</h2>
+                <button onclick="resetFilters()" class="w-full px-3 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center gap-2 transition border border-slate-200">
                     <i class="fa-solid fa-arrow-rotate-left"></i>
-                    <span>Reset</span>
+                    <span>Reset All</span>
                 </button>
             </div>
 
-            <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar" id="category-chips"></div>
-        </div>
-
-        <!-- Grid Status Header -->
-        <div class="flex items-center justify-between mb-4">
-            <div class="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                <span>Animals Count:</span>
-                <span id="animal-count-badge" class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-mono">0</span>
+            <!-- Recorded Only Toggle -->
+            <div class="space-y-2.5 pb-4 border-b border-slate-200/80">
+                <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Recording Status</h3>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="recorded-only-toggle" onchange="handleRecordedOnlyFilter()" class="sr-only peer" />
+                    <div class="w-11 h-6 bg-slate-200 rounded-full peer-checked:bg-emerald-500 peer-focus:ring-2 peer-focus:ring-emerald-300 relative transition-colors">
+                        <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transform transition-transform peer-checked:translate-x-5 shadow-sm"></span>
+                    </div>
+                    <span class="text-xs font-semibold text-slate-700">Show Recorded Only</span>
+                </label>
             </div>
-            <div class="text-xs text-slate-400 font-medium">
-                <i class="fa-solid fa-volume-high text-blue-500"></i> Click play to hear animal sound
+
+            <!-- Categories Section -->
+            <div class="space-y-3 pb-4 border-b border-slate-200/80">
+                <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Categories</h3>
+                <div id="category-chips" class="space-y-2 flex flex-col"></div>
+            </div>
+
+            <!-- Pagination Section (controls moved to main area) -->
+            <div class="space-y-3 pt-2">
+                <!-- Controls intentionally left in main area. -->
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 overflow-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+            <!-- Search & Filter Controls -->
+            <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 mb-4">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="search-input" placeholder="Search 114 animals, habitats, or sound effects..." oninput="handleSearch()"
+                            class="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-sm font-semibold text-slate-800 placeholder-slate-400 transition outline-none">
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Grid Status Header -->
+            <div class="flex items-center justify-between mb-5">
+                <div class="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                    <span>Results:</span>
+                    <span id="animal-count-badge" class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-mono font-bold">0</span>
+                </div>
+                <div class="text-xs text-slate-400 font-medium">
+                    <i class="fa-solid fa-volume-high text-blue-500"></i> Click play to hear animal sound
+                </div>
+            </div>
+
+            <!-- Pagination Controls (under Results) -->
+            <div class="flex items-center justify-between mb-4 bg-white rounded-2xl p-3 border border-slate-200/80">
+                <div class="flex items-center gap-2.5">
+                    <label class="text-xs font-bold text-slate-600">Items per page:</label>
+                    <select id="pagination-select" onchange="handlePaginationChange()" class="px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 focus:ring-2 focus:ring-blue-500 focus:bg-white transition cursor-pointer">
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                        <option value="all">All</option>
+                    </select>
+                </div>
+                <div id="pagination-info" class="text-xs font-medium text-slate-500 flex items-center gap-2">
+                    <span id="current-page-info">Page 1</span>
+                    <span id="total-pages-info"></span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="prev-page-btn" onclick="previousPage()" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fa-solid fa-chevron-left"></i> Prev
+                    </button>
+                    <button id="next-page-btn" onclick="nextPage()" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-chevron-right"></i> Next
+                    </button>
+                </div>
+            </div>
+
+            <!-- Animals Grid Container -->
+            <div id="animals-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"></div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-16 bg-white rounded-3xl border border-slate-200/80 p-8 my-6">
+                <div class="text-5xl mb-3">🔍</div>
+                <h3 class="text-lg font-bold text-slate-800 mb-1">No animals found</h3>
+                <p class="text-xs text-slate-500 max-w-sm mx-auto mb-4">Try adjusting your search query or select another category filter.</p>
+                <button onclick="resetFilters()" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition">Show All 114 Animals</button>
             </div>
         </div>
-
-        <!-- Animals Grid Container -->
-        <div id="animals-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></div>
-
-        <!-- Empty State -->
-        <div id="empty-state" class="hidden text-center py-16 bg-white rounded-3xl border border-slate-200/80 p-8 my-6">
-            <div class="text-5xl mb-3">🔍</div>
-            <h3 class="text-lg font-bold text-slate-800 mb-1">No animals found</h3>
-            <p class="text-xs text-slate-500 max-w-sm mx-auto mb-4">Try adjusting your search query or select another category filter.</p>
-            <button onclick="resetFilters()" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition">Show All 114 Animals</button>
-        </div>
-
     </main>
 
     <!-- Voice Recording Modal -->
@@ -192,6 +242,7 @@
         </div>
     </div>
 
+
     <!-- Toast Container -->
     <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl transform translate-y-16 opacity-0 transition-all duration-300 flex items-center gap-2.5 pointer-events-none">
         <i id="toast-icon" class="fa-solid fa-circle-info text-emerald-400 text-sm"></i>
@@ -202,15 +253,15 @@
         // 114 Animals Dataset across 9 Categories
         const animalsData = [
             // Farm (13)
-            { id: 'cow', name: 'Cow', sciName: 'Bos taurus', category: 'Farm', emoji: '🐮', soundDesc: 'Deep Moo', fact: 'Cows have best friends and experience stress when separated.', synthType: 'moo' },
-            { id: 'dog', name: 'Dog', sciName: 'Canis lupus familiaris', category: 'Farm', emoji: '🐶', soundDesc: 'Playful Bark', fact: 'Dogs have a sense of smell 10,000x stronger than humans.', synthType: 'bark' },
-            { id: 'rooster', name: 'Rooster', sciName: 'Gallus gallus domesticus', category: 'Farm', emoji: '🐓', soundDesc: 'Crowing Call', fact: 'Roosters crow to signal territory at dawn.', synthType: 'chirp' },
-            { id: 'duck', name: 'Duck', sciName: 'Anas platyrhynchos', category: 'Farm', emoji: '🦆', soundDesc: 'Quack', fact: 'Ducks have waterproof feathers due to a special oil gland.', synthType: 'quack' },
-            { id: 'sheep', name: 'Sheep', sciName: 'Ovis aries', category: 'Farm', emoji: '🐑', soundDesc: 'Gentle Baa', fact: 'Sheep have rectangular pupils giving 300-degree vision.', synthType: 'moo' },
-            { id: 'horse', name: 'Horse', sciName: 'Equus caballus', category: 'Farm', emoji: '🐴', soundDesc: 'Vibrant Neigh', fact: 'Horses can sleep both standing up and lying down.', synthType: 'trumpet' },
-            { id: 'pig', name: 'Pig', sciName: 'Sus domesticus', category: 'Farm', emoji: '🐷', soundDesc: 'Oink Oink', fact: 'Pigs are extremely intelligent and learn tricks faster than dogs.', synthType: 'bark' },
-            { id: 'goat', name: 'Goat', sciName: 'Capra hircus', category: 'Farm', emoji: '🐐', soundDesc: 'Bleat Call', fact: 'Goats have accent-like variations in their vocal calls.', synthType: 'moo' },
-            { id: 'donkey', name: 'Donkey', sciName: 'Equus asinus', category: 'Farm', emoji: '🫏', soundDesc: 'Hee-Haw', fact: 'Donkey braying can carry across 60 miles of desert.', synthType: 'trumpet' },
+            { id: 'cow', name: 'Cow', sciName: 'Bos taurus', category: 'Farm', emoji: '🐮', soundDesc: 'Deep Moo', fact: 'Cows have best friends and experience stress when separated.', synthType: 'moo', defaultSound: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Single_Cow_Moo.ogg' },
+            { id: 'dog', name: 'Dog', sciName: 'Canis lupus familiaris', category: 'Farm', emoji: '🐶', soundDesc: 'Playful Bark', fact: 'Dogs have a sense of smell 10,000x stronger than humans.', synthType: 'bark', defaultSound: 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Dog_whimpering.webm' },
+            { id: 'rooster', name: 'Rooster', sciName: 'Gallus gallus domesticus', category: 'Farm', emoji: '🐓', soundDesc: 'Crowing Call', fact: 'Roosters crow to signal territory at dawn.', synthType: 'chirp', defaultSound: 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Small_rooster_crowing.ogg' },
+            { id: 'duck', name: 'Duck', sciName: 'Anas platyrhynchos', category: 'Farm', emoji: '🦆', soundDesc: 'Quack', fact: 'Ducks have waterproof feathers due to a special oil gland.', synthType: 'quack', defaultSound: 'https://upload.wikimedia.org/wikipedia/commons/d/d0/Domestic_duck_sound_01.wav' },
+            { id: 'sheep', name: 'Sheep', sciName: 'Ovis aries', category: 'Farm', emoji: '🐑', soundDesc: 'Gentle Baa', fact: 'Sheep have rectangular pupils giving 300-degree vision.', synthType: 'moo', defaultSound: 'https://upload.wikimedia.org/wikipedia/commons/1/13/Sheep_bleating.ogg' },
+            { id: 'horse', name: 'Horse', sciName: 'Equus caballus', category: 'Farm', emoji: '🐴', soundDesc: 'Vibrant Neigh', fact: 'Horses can sleep both standing up and lying down.', synthType: 'trumpet', defaultSound: 'https://upload.wikimedia.org/wikipedia/commons/d/db/Wiehern.ogg' },
+            { id: 'pig', name: 'Pig', sciName: 'Sus domesticus', category: 'Farm', emoji: '🐷', soundDesc: 'Oink Oink', fact: 'Pigs are extremely intelligent and learn tricks faster than dogs.', synthType: 'bark', defaultSound: 'https://upload.wikimedia.org/wikipedia/commons/7/73/Mudchute_pig_1.ogg' },
+            { id: 'goat', name: 'Goat', sciName: 'Capra hircus', category: 'Farm', emoji: '🐐', soundDesc: 'Bleat Call', fact: 'Goats have accent-like variations in their vocal calls.', synthType: 'moo', defaultSound: 'https://upload.wikimedia.org/wikipedia/commons/b/bc/Herd_of_goats_bleating.ogg' },
+            { id: 'donkey', name: 'Donkey', sciName: 'Equus asinus', category: 'Farm', emoji: '🫏', soundDesc: 'Hee-Haw', fact: 'Donkey braying can carry across 60 miles of desert.', synthType: 'trumpet', defaultSound: 'https://upload.wikimedia.org/wikipedia/commons/2/25/157763_felix-blume_a-donkey-is-braying-in-his-enclosure-in-south-of-france.wav' },
             { id: 'turkey', name: 'Turkey', sciName: 'Meleagris gallopavo', category: 'Farm', emoji: '🦃', soundDesc: 'Gobble', fact: 'Turkeys can run up to 25 miles per hour.', synthType: 'chirp' },
             { id: 'llama', name: 'Llama', sciName: 'Lama glama', category: 'Farm', emoji: '🦙', soundDesc: 'Humming sound', fact: 'Llamas communicate by humming when curious or concerned.', synthType: 'moo' },
             { id: 'goose', name: 'Goose', sciName: 'Anser anser', category: 'Farm', emoji: '🪿', soundDesc: 'Honk Call', fact: 'Geese fly in a V-formation to save energy during long flights.', synthType: 'quack' },
@@ -343,8 +394,13 @@
         let selectedCategory = 'All';
         let searchQuery = '';
         let currentlyPlayingId = null;
+        // separate maps for recorded (via Record modal) and uploaded (file input)
         let recordedAudioUrls = {};
+        let uploadedAudioUrls = {};
         let activeRecordAnimalId = null;
+        let recordedOnlyFilter = false;
+                let itemsPerPage = 10;
+        let currentPage = 1;
 
         let mediaRecorder = null;
         let audioChunks = [];
@@ -373,11 +429,11 @@
             });
         }
 
-        async function saveRecordingToDB(animalId, blob) {
+        async function saveRecordingToDB(key, blob) {
             if (!db) return;
             const transaction = db.transaction(["recordings"], "readwrite");
             const store = transaction.objectStore("recordings");
-            store.put(blob, animalId);
+            store.put(blob, key);
         }
 
         async function loadSavedRecordings() {
@@ -390,7 +446,22 @@
                     const cursor = e.target.result;
                     if (cursor) {
                         const blob = cursor.value;
-                        recordedAudioUrls[cursor.key] = URL.createObjectURL(blob);
+                        const key = String(cursor.key);
+                        try {
+                            // expected key format: {animalId}_recorded or {animalId}_uploaded
+                            if (key.endsWith('_recorded')) {
+                                const animalId = key.slice(0, -'_recorded'.length);
+                                recordedAudioUrls[animalId] = URL.createObjectURL(blob);
+                            } else if (key.endsWith('_uploaded')) {
+                                const animalId = key.slice(0, -'_uploaded'.length);
+                                uploadedAudioUrls[animalId] = URL.createObjectURL(blob);
+                            } else {
+                                // legacy keys: if they look like animal ids, try to load as recorded
+                                // skip otherwise
+                            }
+                        } catch (err) {
+                            console.warn('Error loading saved recording key:', cursor.key, err);
+                        }
                         cursor.continue();
                     } else {
                         resolve();
@@ -407,13 +478,13 @@
                 const count = cat === 'All' ? animalsData.length : animalsData.filter(a => a.category === cat).length;
                 return `
                     <button onclick="setCategory('${cat}')" 
-                        class="px-4 py-2 rounded-2xl text-xs font-extrabold transition-all whitespace-nowrap active:scale-95 flex items-center gap-1.5 ${
+                        class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center justify-between ${
                             isActive 
-                            ? 'bg-slate-900 text-white shadow-md' 
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' 
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                         }">
                         <span>${cat}</span>
-                        <span class="text-[10px] opacity-75 bg-slate-700/20 px-1.5 py-0.2 rounded-full font-mono">${count}</span>
+                        <span class="text-[10px] opacity-75 bg-slate-700/20 px-1.5 py-0.5 rounded-lg font-mono font-semibold">${count}</span>
                     </button>
                 `;
             }).join('');
@@ -433,7 +504,12 @@
         function resetFilters() {
             selectedCategory = 'All';
             searchQuery = '';
+            recordedOnlyFilter = false;
+            currentPage = 1;
+            itemsPerPage = 10;
             document.getElementById('search-input').value = '';
+            document.getElementById('recorded-only-toggle').checked = false;
+            document.getElementById('pagination-select').value = '10';
             renderCategories();
             renderList();
         }
@@ -442,14 +518,15 @@
             const grid = document.getElementById('animals-grid');
             const emptyState = document.getElementById('empty-state');
 
-            const filtered = animalsData.filter(animal => {
+            let filtered = animalsData.filter(animal => {
                 const matchesCat = selectedCategory === 'All' || animal.category === selectedCategory;
                 const matchesSearch = !searchQuery || 
                     animal.name.toLowerCase().includes(searchQuery) || 
                     animal.sciName.toLowerCase().includes(searchQuery) ||
                     animal.soundDesc.toLowerCase().includes(searchQuery) ||
                     animal.category.toLowerCase().includes(searchQuery);
-                return matchesCat && matchesSearch;
+                const matchesRecordedOnly = !recordedOnlyFilter || !!(recordedAudioUrls[animal.id] || uploadedAudioUrls[animal.id]);
+                return matchesCat && matchesSearch && matchesRecordedOnly;
             });
 
             document.getElementById('animal-count-badge').textContent = filtered.length;
@@ -457,22 +534,40 @@
             if (filtered.length === 0) {
                 grid.innerHTML = '';
                 emptyState.classList.remove('hidden');
+                updatePaginationUI(0);
                 return;
             }
 
             emptyState.classList.add('hidden');
 
-            grid.innerHTML = filtered.map(animal => {
+            // Pagination logic
+            const totalPages = itemsPerPage === 'all' ? 1 : Math.ceil(filtered.length / itemsPerPage);
+            const actualItemsPerPage = itemsPerPage === 'all' ? filtered.length : itemsPerPage;
+            
+            // Ensure current page is valid
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIdx = (currentPage - 1) * actualItemsPerPage;
+            const endIdx = startIdx + actualItemsPerPage;
+            const paginatedAnimals = filtered.slice(startIdx, endIdx);
+
+            grid.innerHTML = paginatedAnimals.map(animal => {
                 const isPlaying = currentlyPlayingId === animal.id;
-                const hasCustomVoice = !!recordedAudioUrls[animal.id];
+                const hasRecorded = !!recordedAudioUrls[animal.id];
+                const hasUploaded = !!uploadedAudioUrls[animal.id];
+                const hasCustomVoice = hasRecorded || hasUploaded;
 
                 return `
                     <div class="bg-white rounded-3xl p-5 border border-slate-200/80 card-hover-effect flex flex-col justify-between relative overflow-hidden group">
-                        ${hasCustomVoice ? `
-                            <span class="absolute top-3.5 right-3.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1 shadow-sm">
-                                <i class="fa-solid fa-microphone text-amber-600"></i> Custom
-                            </span>
-                        ` : ''}
+
+                        <!-- upload button top-right -->
+                        <div class="absolute top-3.5 right-3.5 flex items-center gap-2">
+                            <input type="file" id="upload-input-${animal.id}" accept="audio/*" onchange="handleFileUpload(event, '${animal.id}')" class="hidden" />
+                            <button onclick="triggerUpload('${animal.id}')" title="Upload Sound" class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition active:scale-95 border border-slate-200 flex items-center justify-center">
+                                <i class="fa-solid fa-upload text-slate-600 text-sm"></i>
+                            </button>
+                        </div>
 
                         <div>
                             <div class="flex items-center gap-3 mb-3">
@@ -500,33 +595,94 @@
                         </div>
 
                         <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
-                            <button onclick="playAnimalSound('${animal.id}')" 
-                                class="flex-1 py-2.5 px-3 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95 ${
-                                    isPlaying 
-                                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-500/50' 
-                                    : 'btn-gradient-primary text-white'
-                                }">
-                                ${isPlaying ? `
-                                    <div class="flex items-center gap-1 h-4">
-                                        <span class="w-1 bg-white animate-wave-bar-1"></span>
-                                        <span class="w-1 bg-white animate-wave-bar-2"></span>
-                                        <span class="w-1 bg-white animate-wave-bar-3"></span>
+                            <div class="flex-1 flex flex-col items-center">
+                                ${hasRecorded ? `
+                                    <div class="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-bold mb-2">
+                                        <i class="fa-solid fa-microphone text-amber-600"></i>
+                                        <span>Recorded</span>
+                                        <button onclick="deleteRecordedSound('${animal.id}')" title="Delete Recorded Sound" class="ml-2 text-rose-600 hover:text-rose-800 focus:outline-none"><i class="fa-solid fa-trash"></i></button>
                                     </div>
-                                    <span>Playing...</span>
-                                ` : `
-                                    <i class="fa-solid fa-circle-play text-sm"></i>
-                                    <span>${hasCustomVoice ? 'Play Custom' : 'Play Sound'}</span>
-                                `}
-                            </button>
+                                ` : `<div style="height:18px" class="mb-2"></div>`}
 
-                            <button onclick="openRecordModal('${animal.id}')" title="Record Custom Sound"
-                                class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition active:scale-95 border border-slate-200 flex items-center justify-center">
-                                <i class="fa-solid fa-microphone text-rose-500 text-sm"></i>
-                            </button>
+                                <button onclick="togglePlay('${animal.id}')" 
+                                    class="w-full py-2.5 px-3 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95 ${
+                                        isPlaying 
+                                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-500/50' 
+                                        : (hasCustomVoice ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30' : 'btn-gradient-primary text-white')
+                                    }">
+                                    ${isPlaying ? `
+                                        <div class="flex items-center gap-1 h-4">
+                                            <span class="w-1 bg-white animate-wave-bar-1"></span>
+                                            <span class="w-1 bg-white animate-wave-bar-2"></span>
+                                            <span class="w-1 bg-white animate-wave-bar-3"></span>
+                                        </div>
+                                        <span>Playing...</span>
+                                    ` : `
+                                        <i class="fa-solid fa-circle-play text-sm"></i>
+                                        <span>Play Sound</span>
+                                    `}
+                                </button>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                ${!hasRecorded ? `
+                                <button onclick="openRecordModal('${animal.id}')" title="Record Custom Sound"
+                                    class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition active:scale-95 border border-slate-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-microphone text-rose-500 text-sm"></i>
+                                </button>
+                                ` : ''}
+
+                            </div>
                         </div>
                     </div>
                 `;
             }).join('');
+
+            updatePaginationUI(totalPages);
+        }
+
+        function updatePaginationUI(totalPages) {
+            const prevBtn = document.getElementById('prev-page-btn');
+            const nextBtn = document.getElementById('next-page-btn');
+            const pageInfo = document.getElementById('current-page-info');
+            const totalInfo = document.getElementById('total-pages-info');
+
+            pageInfo.textContent = `Page ${currentPage}`;
+            if (totalPages > 1) {
+                totalInfo.textContent = `of ${totalPages}`;
+            } else {
+                totalInfo.textContent = '';
+            }
+
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages || totalPages === 0;
+        }
+
+        function nextPage() {
+            currentPage++;
+            renderList();
+            window.scrollTo(0, 0);
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderList();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function handlePaginationChange() {
+            const selectVal = document.getElementById('pagination-select').value;
+            itemsPerPage = selectVal === 'all' ? 'all' : parseInt(selectVal);
+            currentPage = 1;
+            renderList();
+        }
+
+        function handleRecordedOnlyFilter() {
+            recordedOnlyFilter = document.getElementById('recorded-only-toggle').checked;
+            currentPage = 1;
+            renderList();
         }
 
         function fallbackToSynthesis(animal) {
@@ -695,7 +851,7 @@
 
         let currentAudio = null;
 
-        function playAnimalSound(animalId) {
+        function playAnimalSound(animalId, source) {
             const animal = animalsData.find(a => a.id === animalId);
             if (!animal) return;
 
@@ -707,24 +863,45 @@
             currentlyPlayingId = animalId;
             renderList();
 
-            if (recordedAudioUrls[animalId]) {
-                currentAudio = new Audio(recordedAudioUrls[animalId]);
-                currentAudio.play().then(() => {
-                    showToast(`Playing custom recorded voice for ${animal.name}! 🎙️`);
-                }).catch(() => fallbackToSynthesis(animal));
+            // Determine which source to play
+            const hasRecorded = !!recordedAudioUrls[animalId];
+            const hasUploaded = !!uploadedAudioUrls[animalId];
+            const hasDefault = !!animal.defaultSound;
 
-                currentAudio.onended = () => {
-                    currentlyPlayingId = null;
-                    renderList();
-                };
+            const pick = source || (hasRecorded ? 'recorded' : (hasUploaded ? 'uploaded' : (hasDefault ? 'default' : 'synth')));
+
+            if (pick === 'recorded' && hasRecorded) {
+                currentAudio = new Audio(recordedAudioUrls[animalId]);
+                currentAudio.play().then(() => showToast(`Playing recorded voice for ${animal.name}! 🎙️`)).catch(() => fallbackToSynthesis(animal));
+            } else if (pick === 'uploaded' && hasUploaded) {
+                currentAudio = new Audio(uploadedAudioUrls[animalId]);
+                currentAudio.play().then(() => showToast(`Playing uploaded sound for ${animal.name}! 🎧`)).catch(() => {
+                    if (hasDefault) {
+                        currentAudio = new Audio(animal.defaultSound);
+                        currentAudio.play().catch(() => fallbackToSynthesis(animal));
+                    } else fallbackToSynthesis(animal);
+                });
+            } else if (pick === 'default' && hasDefault) {
+                currentAudio = new Audio(animal.defaultSound);
+                currentAudio.play().then(() => showToast(`Playing default sound for ${animal.name}! 🔊`)).catch(() => fallbackToSynthesis(animal));
             } else {
+                // fallback to synthesis
                 fallbackToSynthesis(animal);
                 setTimeout(() => {
                     currentlyPlayingId = null;
                     renderList();
                 }, 1200);
+                return;
+            }
+
+            if (currentAudio) {
+                currentAudio.onended = () => {
+                    currentlyPlayingId = null;
+                    renderList();
+                };
             }
         }
+
 
         function playRandomSound() {
             const randomAnimal = animalsData[Math.floor(Math.random() * animalsData.length)];
@@ -850,9 +1027,10 @@
             }
 
             const audioUrl = URL.createObjectURL(finalBlob);
+            // save as recorded-specific key (global)
             recordedAudioUrls[activeRecordAnimalId] = audioUrl;
-
-            await saveRecordingToDB(activeRecordAnimalId, finalBlob);
+            const storageKey = `${activeRecordAnimalId}_recorded`;
+            await saveRecordingToDB(storageKey, finalBlob);
 
             const animal = animalsData.find(a => a.id === activeRecordAnimalId);
             showToast(`Saved custom voice for ${animal.name}! 🎙️`);
@@ -1000,6 +1178,137 @@
                 toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-16', 'opacity-0');
             }, 3000);
+        }
+
+        // Upload helpers: trigger the hidden file input and handle uploads per animal
+        function triggerUpload(animalId) {
+            const inp = document.getElementById(`upload-input-${animalId}`);
+            if (inp) inp.click();
+        }
+
+        async function handleFileUpload(event, animalId) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            if (!/^audio\//i.test(file.type)) {
+                showToast('Please select an audio file (mp3, wav, ogg).');
+                event.target.value = '';
+                return;
+            }
+
+            const audioUrl = URL.createObjectURL(file);
+            // save as uploaded-specific key (global)
+            uploadedAudioUrls[animalId] = audioUrl;
+            try {
+                await saveRecordingToDB(`${animalId}_uploaded`, file);
+                const animal = animalsData.find(a => a.id === animalId);
+                showToast(`Uploaded custom sound for ${animal.name}! 🎧`);
+                renderList();
+            } catch (e) {
+                console.error('Failed to save uploaded file', e);
+                showToast('Failed to save upload.');
+            } finally {
+                event.target.value = '';
+            }
+        }
+
+        // remove custom sound(s) for an animal (uploaded and/or recorded)
+        async function deleteFromDB(key) {
+            if (!db) return;
+            return new Promise((resolve) => {
+                try {
+                    const tx = db.transaction(['recordings'], 'readwrite');
+                    const store = tx.objectStore('recordings');
+                    const req = store.delete(key);
+                    req.onsuccess = () => resolve();
+                    req.onerror = () => resolve();
+                } catch (e) { resolve(); }
+            });
+        }
+
+        async function removeCustomSound(animalId) {
+            const animal = animalsData.find(a => a.id === animalId);
+            if (!animal) return;
+
+            let removedAny = false;
+            const uploadedKey = `${animalId}_uploaded`;
+            const recordedKey = `${animalId}_recorded`;
+
+            if (uploadedAudioUrls[animalId]) {
+                try { URL.revokeObjectURL(uploadedAudioUrls[animalId]); } catch (e) {}
+                delete uploadedAudioUrls[animalId];
+                await deleteFromDB(uploadedKey);
+                removedAny = true;
+            }
+
+            if (recordedAudioUrls[animalId]) {
+                try { URL.revokeObjectURL(recordedAudioUrls[animalId]); } catch (e) {}
+                delete recordedAudioUrls[animalId];
+                await deleteFromDB(recordedKey);
+                removedAny = true;
+            }
+
+            if (removedAny) showToast(`Removed custom sound(s) for ${animal.name}.`);
+            else showToast(`No custom sound found for ${animal.name}.`);
+
+            renderList();
+        }
+
+        async function deleteRecordedSound(animalId) {
+            const animal = animalsData.find(a => a.id === animalId);
+            if (!animal) return;
+            const recordedKey = `${animalId}_recorded`;
+            if (recordedAudioUrls[animalId]) {
+                try { URL.revokeObjectURL(recordedAudioUrls[animalId]); } catch(e) {}
+                delete recordedAudioUrls[animalId];
+                await deleteFromDB(recordedKey);
+                showToast(`Removed recorded sound for ${animal.name}.`);
+                renderList();
+            } else {
+                showToast('No recorded sound found.');
+            }
+        }
+
+        // Toggle play/pause
+        function togglePlay(animalId) {
+            // if same animal is playing -> pause
+            if (currentlyPlayingId === animalId && currentAudio) {
+                try {
+                    if (!currentAudio.paused) {
+                        currentAudio.pause();
+                        currentlyPlayingId = null;
+                        renderList();
+                        showToast('Paused');
+                        return;
+                    } else {
+                        currentAudio.play().then(() => {
+                            currentlyPlayingId = animalId;
+                            renderList();
+                        }).catch(() => {});
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Toggle play error', e);
+                }
+            }
+
+            // stop any other audio
+            if (currentAudio) {
+                try { currentAudio.pause(); } catch(e){}
+                currentAudio = null;
+                currentlyPlayingId = null;
+            }
+
+            // play (recorded/uploaded/default priority)
+            playAnimalSound(animalId);
+        }
+
+        async function awaitLoadSavedThenRender() {
+            // reload saved recordings
+            recordedAudioUrls = {};
+            uploadedAudioUrls = {};
+            await loadSavedRecordings();
+            renderCategories();
+            renderList();
         }
 
         window.onload = async function() {
