@@ -104,10 +104,10 @@
                 <div id="category-chips" class="space-y-2 flex flex-col"></div>
             </div>
 
-            <!-- Pagination Section -->
+            <!-- Pagination Section (controls moved to main area) -->
             <div class="space-y-3 pt-2">
-                <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Pagination</h3>
-                
+                <!-- Controls intentionally left in main area. -->
+            </div>
         </aside>
 
         <!-- Main Content Area -->
@@ -141,7 +141,7 @@
                     <label class="text-xs font-bold text-slate-600">Items per page:</label>
                     <select id="pagination-select" onchange="handlePaginationChange()" class="px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 focus:ring-2 focus:ring-blue-500 focus:bg-white transition cursor-pointer">
                         <option value="10">10</option>
-                        <option value="20" selected>20</option>
+                        <option value="10" selected>10</option>
                         <option value="30">30</option>
                         <option value="50">50</option>
                         <option value="all">All</option>
@@ -393,7 +393,7 @@
         let recordedAudioUrls = {};
         let activeRecordAnimalId = null;
         let recordedOnlyFilter = false;
-        let itemsPerPage = 20;
+                let itemsPerPage = 10;
         let currentPage = 1;
 
         let mediaRecorder = null;
@@ -488,7 +488,7 @@
             itemsPerPage = 20;
             document.getElementById('search-input').value = '';
             document.getElementById('recorded-only-toggle').checked = false;
-            document.getElementById('pagination-select').value = '20';
+                        document.getElementById('pagination-select').value = '10';
             renderCategories();
             renderList();
         }
