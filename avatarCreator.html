@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>米娜萌宠 · Mina Avatar Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rice: #F6EEDC;
+    --rice-deep: #EFE3C6;
+    --lacquer: #C0432E;
+    --lacquer-deep: #93261C;
+    --leaf-solid: #3E8259;
+    --leaf-deep: #285C3B;
+    --citrus: #E8A23A;
+    --citrus-deep: #B47A1F;
+    --ink: #2B211B;
+    --ink-soft: #6b5c4c;
+    --basket: #D8C598;
+    --basket-line: #B49E68;
+    --card-shadow: 0 18px 40px -14px rgba(43,33,27,0.35);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; min-height: 100%;
+    background: var(--rice); color: var(--ink);
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    max-width: 100vw; overflow-x: hidden;
+    -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  }
+  button { font-family: inherit; }
+  .en-label { font-size: 0.86em; font-weight: 700; opacity: 0.62; margin-left: 4px; letter-spacing: 0.2px; }
+  .stage { max-width: 720px; margin: 0 auto; padding: 22px 16px 60px; }
+  header { text-align: center; margin-bottom: 16px; }
+  header h1 { font-family: 'Ma Shan Zheng', cursive; font-size: 32px; color: var(--lacquer); margin: 0 0 2px; letter-spacing: 2px; }
+  header p { margin: 0; color: var(--ink-soft); font-weight: 700; font-size: 13px; }
+
+  .who-row {
+    display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+    background: linear-gradient(180deg, #fffaf0, var(--rice-deep));
+    border-radius: 16px; padding: 12px 14px; margin-bottom: 16px;
+    box-shadow: var(--card-shadow), inset 0 0 0 2px rgba(180,158,104,0.35);
+  }
+  .who-row label { font-weight: 800; font-size: 13.5px; color: var(--ink-soft); }
+  .who-select {
+    flex: 1; min-width: 140px; padding: 9px 12px; border-radius: 999px; border: 2px solid var(--basket-line);
+    font-size: 14px; font-weight: 700; background: #fff; color: var(--ink);
+  }
+  .no-profile-hint { font-size: 12px; color: var(--ink-soft); font-weight: 600; text-align: center; }
+
+  .preview-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 18px;
+  }
+  .avatar-preview {
+    width: 168px; height: 168px; border-radius: 50%; overflow: hidden;
+    box-shadow: 0 0 0 4px #fff, var(--card-shadow);
+    background: var(--rice-deep);
+  }
+  .avatar-preview svg { width: 100%; height: 100%; display: block; }
+  .preview-name { font-weight: 800; font-size: 16px; }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 14px; }
+  .tab-btn {
+    border: none; border-radius: 999px; padding: 8px 16px; font-weight: 800; font-size: 13px;
+    background: var(--rice-deep); color: var(--ink-soft); cursor: pointer;
+  }
+  .tab-btn.active { background: var(--lacquer); color: #fff; }
+
+  .opt-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 10px;
+    margin-bottom: 18px;
+  }
+  .opt-cell {
+    background: linear-gradient(180deg, #fffaf0, var(--rice-deep));
+    border: 3px solid transparent; border-radius: 16px; padding: 8px 6px 6px; text-align: center; cursor: pointer;
+    box-shadow: var(--card-shadow);
+  }
+  .opt-cell.picked { border-color: var(--leaf-solid); background: #eafff2; }
+  .opt-cell.locked { opacity: 0.88; }
+  .opt-cell .opt-swatch { width: 100%; aspect-ratio: 1; border-radius: 10px; margin-bottom: 4px; position: relative; }
+  .opt-cell .opt-thumb { width: 100%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; margin-bottom: 4px; background: var(--rice-deep); }
+  .opt-cell .opt-thumb svg { width: 100%; height: 100%; display: block; }
+  .opt-cell .opt-label { font-size: 11px; font-weight: 800; color: var(--ink); line-height: 1.2; }
+  .opt-cell .opt-en { font-size: 9.5px; font-weight: 700; color: var(--ink-soft); opacity: 0.8; }
+  .opt-cell .opt-price {
+    font-size: 10.5px; font-weight: 800; color: var(--citrus-deep); margin-top: 2px;
+  }
+  .opt-cell.picked .opt-price { color: var(--leaf-solid); }
+  .coin-pill {
+    background: var(--citrus); color: #fff; font-weight: 800; font-size: 13px;
+    padding: 7px 14px; border-radius: 999px; white-space: nowrap;
+  }
+
+  .actions { display: flex; gap: 10px; justify-content: center; margin-top: 6px; }
+  .btn {
+    border: none; border-radius: 999px; padding: 13px 26px; font-weight: 800; font-size: 15px; cursor: pointer;
+  }
+  .btn.primary { background: var(--leaf-solid); color: #fff; box-shadow: 0 4px 0 var(--leaf-deep); }
+  .btn.primary:active { transform: translateY(3px); box-shadow: none; }
+  .btn.ghost { background: var(--rice-deep); color: var(--ink); }
+  .toast {
+    position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: #fff; font-weight: 800; font-size: 13.5px;
+    padding: 10px 20px; border-radius: 999px; opacity: 0; pointer-events: none; transition: all 0.25s ease;
+    z-index: 50; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .shared-note {
+    max-width: 500px; margin: 22px auto 0; text-align: center; font-size: 11.5px;
+    color: var(--ink-soft); font-weight: 600; line-height: 1.6; opacity: 0.85;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <h1>米娜萌宠 Mina Avatar Creator</h1>
+    <p>捏一只专属Q版萌宠,米娜小游戏铺里的所有游戏都会用它 · Customize once, use it in every Mina game</p>
+  </header>
+
+  <div class="who-row" id="whoRow">
+    <label>👤 给谁捏脸 For</label>
+    <select class="who-select" id="whoSelect"></select>
+    <span class="coin-pill" id="coinPill">🪙 0</span>
+  </div>
+  <p class="no-profile-hint hidden" id="noProfileHint">没有找到已有玩家 · 先在米娜集市里新建一个玩家,再回来这里捏脸哦</p>
+
+  <div class="preview-wrap">
+    <div class="avatar-preview" id="avatarPreview"></div>
+    <div class="preview-name" id="previewName"></div>
+  </div>
+
+  <div class="tabs" id="tabRow"></div>
+  <div class="opt-grid" id="optGrid"></div>
+
+  <div class="actions">
+    <button class="btn ghost" id="randomBtn" type="button">🎲 随机 Random</button>
+    <button class="btn primary" id="saveBtn" type="button">💾 保存 Save</button>
+  </div>
+
+  <p class="shared-note">这个捏脸工具和米娜小游戏铺里的游戏共用同一份存档(同一个浏览器 / 同一个网站下打开时),保存后回到游戏里就能看到新形象。<br>This tool shares its save data with the Mina games (when opened from the same browser/site) — save here, then reopen a game to see the new look.</p>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  // ================= AvatarKit: shared layered SVG avatar system =================
+  // NOTE: keep this block in sync with the copy embedded in mina_shop_v2.html
+  const AvatarKit = (function(){
+    const FUR_COLORS = [
+      {id:'f1', hex:'#FFF6E8', price:0}, {id:'f2', hex:'#F5CBA0', price:0}, {id:'f3', hex:'#E8A23A', price:15},
+      {id:'f4', hex:'#D97D3D', price:15}, {id:'f5', hex:'#8D5524', price:15}, {id:'f6', hex:'#8C8C8C', price:15},
+      {id:'f7', hex:'#2B211B', price:20}
+    ];
+    const OUTFIT_COLORS = [
+      {id:'o1', hex:'#C0432E', price:0}, {id:'o2', hex:'#3E8259', price:15}, {id:'o3', hex:'#3B6FA0', price:15},
+      {id:'o4', hex:'#E8A23A', price:15}, {id:'o5', hex:'#8E5FBF', price:15}, {id:'o6', hex:'#F6EEDC', price:15}
+    ];
+    const SPECIES = [
+      {id:'cat', zh:'猫咪', en:'Cat', price:0}, {id:'dog', zh:'小狗', en:'Dog', price:0},
+      {id:'rabbit', zh:'兔子', en:'Rabbit', price:20}, {id:'bear', zh:'小熊', en:'Bear', price:20},
+      {id:'fox', zh:'狐狸', en:'Fox', price:25}, {id:'panda', zh:'熊猫', en:'Panda', price:30}
+    ];
+    const EYES = [
+      {id:'round', zh:'圆眼', en:'Round', price:0}, {id:'sleepy', zh:'眯眼', en:'Sleepy', price:15},
+      {id:'star', zh:'星星眼', en:'Star', price:25}, {id:'sharp', zh:'锐利眼', en:'Sharp', price:20}
+    ];
+    const MOUTHS = [
+      {id:'smile', zh:'微笑', en:'Smile', price:0}, {id:'open', zh:'张嘴笑', en:'Open', price:15},
+      {id:'flat', zh:'平嘴', en:'Flat', price:10}, {id:'grin', zh:'咧嘴笑', en:'Grin', price:15}
+    ];
+    const OUTFITS = [
+      {id:'tshirt', zh:'T恤', en:'T-Shirt', price:0}, {id:'hoodie', zh:'连帽衫', en:'Hoodie', price:30},
+      {id:'apron', zh:'围裙', en:'Apron', price:25}, {id:'dress', zh:'连衣裙', en:'Dress', price:35}
+    ];
+    const ACCESSORIES = [
+      {id:'none', zh:'不戴', en:'None', price:0}, {id:'glasses', zh:'眼镜', en:'Glasses', price:25},
+      {id:'bow', zh:'蝴蝶结', en:'Bow', price:25}, {id:'cap', zh:'鸭舌帽', en:'Cap', price:35}
+    ];
+
+    function hexOf(list, id){ const f = list.find(x => x.id === id); return f ? f.hex : list[0].hex; }
+    function priceOf(list, id){ const f = list.find(x => x.id === id); return f ? (f.price || 0) : 0; }
+    function pair(leftFrag){ return leftFrag + '<g transform="matrix(-1,0,0,1,240,0)">' + leftFrag + '</g>'; }
+
+    function defaultData(){
+      return { fur:'f2', species:'cat', eyes:'round', mouth:'smile', outfit:'tshirt', outfitColor:'o1', accessory:'none' };
+    }
+
+    function headShape(){
+      return '<ellipse cx="120" cy="112" rx="76" ry="80"/>';
+    }
+    function earsFrag(species, furHex){
+      switch(species){
+        case 'dog':
+          return pair('<ellipse cx="42" cy="92" rx="26" ry="42" fill="' + furHex + '" transform="rotate(-12 42 92)"/><ellipse cx="42" cy="96" rx="13" ry="27" fill="#FFC9C9" opacity="0.65" transform="rotate(-12 42 96)"/>');
+        case 'rabbit':
+          return pair('<ellipse cx="58" cy="6" rx="17" ry="54" fill="' + furHex + '"/><ellipse cx="58" cy="10" rx="8" ry="42" fill="#FFC9C9"/>');
+        case 'bear':
+          return pair('<circle cx="46" cy="38" r="27" fill="' + furHex + '"/><circle cx="46" cy="38" r="13" fill="#FFC9C9" opacity="0.6"/>');
+        case 'fox':
+          return pair('<path d="M52,58 L28,2 L88,42 Z" fill="' + furHex + '"/><path d="M55,50 L36,16 L72,40 Z" fill="#fff"/><path d="M44,16 L28,2 L40,26 Z" fill="#2B211B"/>');
+        case 'panda':
+          return pair('<circle cx="44" cy="40" r="28" fill="#2B211B"/>');
+        default:
+          return pair('<path d="M50,60 L34,8 L86,44 Z" fill="' + furHex + '"/><path d="M56,52 L46,24 L74,42 Z" fill="#FFC9C9"/>');
+      }
+    }
+    function muzzleFrag(species){
+      switch(species){
+        case 'fox': return '<path d="M120,118 L84,168 Q120,190 156,168 Z" fill="#FFFFFF" opacity="0.94"/>';
+        case 'panda': return '<ellipse cx="120" cy="148" rx="33" ry="27" fill="#FFFFFF"/>';
+        case 'bear': return '<ellipse cx="120" cy="152" rx="36" ry="29" fill="#FFF6E8" opacity="0.92"/>';
+        case 'rabbit': return '<ellipse cx="120" cy="147" rx="24" ry="19" fill="#FFF6E8" opacity="0.85"/>';
+        case 'dog': return '<ellipse cx="120" cy="150" rx="30" ry="24" fill="#FFF6E8" opacity="0.85"/>';
+        default: return '<ellipse cx="120" cy="145" rx="32" ry="25" fill="#FFF6E8" opacity="0.85"/>';
+      }
+    }
+    function pandaPatchFrag(species){
+      return species === 'panda' ? pair('<ellipse cx="90" cy="112" rx="23" ry="27" fill="#2B211B"/>') : '';
+    }
+    function whiskersFrag(species){
+      if (species !== 'cat') return '';
+      return pair('<path d="M70,132 L34,126 M70,138 L32,138 M70,144 L34,150" stroke="rgba(43,33,27,0.35)" stroke-width="2" fill="none" stroke-linecap="round"/>');
+    }
+    function noseFrag(species){
+      switch(species){
+        case 'rabbit': return '<path d="M115,127 L125,127 L120,134 Z" fill="#F4A6A6"/>';
+        case 'dog': case 'bear': case 'panda':
+          return '<ellipse cx="120" cy="129" rx="7.5" ry="5.5" fill="#2B211B"/>';
+        default:
+          return '<path d="M113,125 L127,125 L120,133 Z" fill="#2B211B"/>';
+      }
+    }
+    function blushFrag(){
+      return pair('<ellipse cx="78" cy="140" rx="12" ry="7" fill="#F4A6A6" opacity="0.55"/>');
+    }
+    function eyesFrag(style){
+      switch(style){
+        case 'sleepy': return pair('<path d="M76,115 Q90,126 104,115" stroke="#2B211B" stroke-width="5" fill="none" stroke-linecap="round"/>');
+        case 'star': return pair('<path d="M90,101 L95,112 L106,115 L95,118 L90,129 L85,118 L74,115 L85,112 Z" fill="#2B211B"/><circle cx="94" cy="110" r="2.2" fill="#fff"/>');
+        case 'sharp': return pair('<path d="M75,111 Q90,102 106,111 L106,122 Q90,115 75,121 Z" fill="#2B211B"/><circle cx="96" cy="114" r="2" fill="#fff"/>');
+        default: return pair('<ellipse cx="90" cy="117" rx="11" ry="13" fill="#2B211B"/><circle cx="94" cy="111" r="3.6" fill="#fff"/><circle cx="86" cy="122" r="1.8" fill="#fff" opacity="0.8"/>');
+      }
+    }
+    function mouthFrag(style){
+      switch(style){
+        case 'open': return '<ellipse cx="120" cy="151" rx="12" ry="9" fill="#5c3320"/><ellipse cx="120" cy="146" rx="11" ry="4" fill="#fff"/>';
+        case 'flat': return '<line x1="106" y1="150" x2="134" y2="150" stroke="#5c3320" stroke-width="4" stroke-linecap="round"/>';
+        case 'grin': return '<path d="M100,146 Q120,168 140,146 Q120,158 100,146 Z" fill="#5c3320"/>';
+        default: return '<path d="M104,148 Q120,161 136,148" stroke="#5c3320" stroke-width="4" fill="none" stroke-linecap="round"/>';
+      }
+    }
+    function outfitFrag(style, hex){
+      const base = 'M40,240 L40,215 Q40,196 70,190 L96,182 Q120,199 144,182 L170,190 Q200,196 200,215 L200,240 Z';
+      switch(style){
+        case 'hoodie':
+          return '<path d="' + base + '" fill="' + hex + '"/><path d="M85,182 Q120,205 155,182 L155,197 Q120,216 85,197 Z" fill="rgba(255,255,255,0.28)"/>';
+        case 'apron':
+          return '<path d="' + base + '" fill="#EFE3C6"/>' +
+                 '<line x1="100" y1="196" x2="86" y2="180" stroke="' + hex + '" stroke-width="7" stroke-linecap="round"/>' +
+                 '<line x1="140" y1="196" x2="154" y2="180" stroke="' + hex + '" stroke-width="7" stroke-linecap="round"/>' +
+                 '<path d="M96,196 L144,196 L150,240 L90,240 Z" fill="' + hex + '"/>';
+        case 'dress':
+          return '<path d="M30,240 L46,215 Q50,196 78,190 L96,182 Q120,199 144,182 L162,190 Q190,196 194,215 L210,240 Z" fill="' + hex + '"/>';
+        default:
+          return '<path d="' + base + '" fill="' + hex + '"/>';
+      }
+    }
+    function accessoryFrag(style){
+      switch(style){
+        case 'glasses':
+          return pair('<circle cx="90" cy="116" r="16" fill="none" stroke="#2B211B" stroke-width="4"/>') +
+                 '<line x1="106" y1="116" x2="134" y2="116" stroke="#2B211B" stroke-width="4"/>';
+        case 'bow':
+          return '<g transform="translate(170,48) rotate(-12)"><path d="M0,0 L-17,-11 L-17,11 Z" fill="#C0432E"/><path d="M0,0 L17,-11 L17,11 Z" fill="#C0432E"/><circle cx="0" cy="0" r="5" fill="#93261C"/></g>';
+        case 'cap':
+          return '<path d="M38,86 Q120,18 202,86 L202,68 Q120,6 38,68 Z" fill="#3B6FA0"/><ellipse cx="156" cy="83" rx="36" ry="10" fill="#3B6FA0"/>';
+        default: return '';
+      }
+    }
+
+    function renderSVG(data){
+      const d = Object.assign(defaultData(), data || {});
+      const furHex = hexOf(FUR_COLORS, d.fur);
+      const outfitHex = hexOf(OUTFIT_COLORS, d.outfitColor);
+      let svg = '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">';
+      svg += outfitFrag(d.outfit, outfitHex);
+      svg += '<rect x="104" y="172" width="32" height="42" rx="10" fill="' + furHex + '"/>';
+      svg += earsFrag(d.species, furHex);
+      svg += '<g fill="' + furHex + '" stroke="rgba(43,33,27,0.15)" stroke-width="2">' + headShape() + '</g>';
+      svg += muzzleFrag(d.species);
+      svg += pandaPatchFrag(d.species);
+      svg += blushFrag();
+      svg += eyesFrag(d.eyes);
+      svg += noseFrag(d.species);
+      svg += mouthFrag(d.mouth);
+      svg += whiskersFrag(d.species);
+      svg += accessoryFrag(d.accessory);
+      svg += '</svg>';
+      return svg;
+    }
+
+    // ---- shared storage ----
+    const AVATAR_STORAGE_KEY = 'minaGames.avatars.v1';
+    function loadAvatarStore(){
+      try{
+        const raw = localStorage.getItem(AVATAR_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch(e){ return {}; }
+    }
+    function saveAvatarStore(store){
+      try{ localStorage.setItem(AVATAR_STORAGE_KEY, JSON.stringify(store)); } catch(e){}
+    }
+    function getAvatarData(profileId){
+      const store = loadAvatarStore();
+      return store[profileId] ? Object.assign(defaultData(), store[profileId]) : defaultData();
+    }
+    function setAvatarData(profileId, data){
+      const store = loadAvatarStore();
+      store[profileId] = data;
+      saveAvatarStore(store);
+    }
+
+    // ---- ownership (which priced items each profile has unlocked) ----
+    const OWNED_STORAGE_KEY = 'minaGames.avatarOwned.v1';
+    function loadOwnedStore(){
+      try{
+        const raw = localStorage.getItem(OWNED_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch(e){ return {}; }
+    }
+    function saveOwnedStore(store){
+      try{ localStorage.setItem(OWNED_STORAGE_KEY, JSON.stringify(store)); } catch(e){}
+    }
+    function isOwned(profileId, field, list, id){
+      if (priceOf(list, id) === 0) return true;
+      const store = loadOwnedStore();
+      const owned = (store[profileId] && store[profileId][field]) || [];
+      return owned.indexOf(id) !== -1;
+    }
+    function unlockItem(profileId, field, id){
+      const store = loadOwnedStore();
+      if (!store[profileId]) store[profileId] = {};
+      if (!store[profileId][field]) store[profileId][field] = [];
+      if (store[profileId][field].indexOf(id) === -1) store[profileId][field].push(id);
+      saveOwnedStore(store);
+    }
+
+    // ---- coins live on the Mina Market profile (minaShop.profiles.v1); this is the
+    // one piece of AvatarKit that's coupled to that specific game's schema, since it's
+    // currently the only source of shared currency in the Mina games collection.
+    const MINA_SHOP_KEY = 'minaShop.profiles.v1';
+    function getProfileCoins(profileId){
+      try{
+        const raw = localStorage.getItem(MINA_SHOP_KEY);
+        if (!raw) return 0;
+        const parsed = JSON.parse(raw);
+        const p = parsed.profiles && parsed.profiles[profileId];
+        return p ? (p.coins || 0) : 0;
+      } catch(e){ return 0; }
+    }
+    function spendProfileCoins(profileId, amount){
+      try{
+        const raw = localStorage.getItem(MINA_SHOP_KEY);
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        const p = parsed.profiles && parsed.profiles[profileId];
+        if (!p || (p.coins || 0) < amount) return false;
+        p.coins -= amount;
+        localStorage.setItem(MINA_SHOP_KEY, JSON.stringify(parsed));
+        return true;
+      } catch(e){ return false; }
+    }
+
+    return {
+      FUR_COLORS: FUR_COLORS, OUTFIT_COLORS: OUTFIT_COLORS,
+      SPECIES: SPECIES, EYES: EYES, MOUTHS: MOUTHS, OUTFITS: OUTFITS, ACCESSORIES: ACCESSORIES,
+      hexOf: hexOf, priceOf: priceOf, defaultData: defaultData, renderSVG: renderSVG,
+      loadAvatarStore: loadAvatarStore, saveAvatarStore: saveAvatarStore,
+      getAvatarData: getAvatarData, setAvatarData: setAvatarData,
+      isOwned: isOwned, unlockItem: unlockItem,
+      getProfileCoins: getProfileCoins, spendProfileCoins: spendProfileCoins
+    };
+  })();
+
+  // ================= UI =================
+  const whoSelect = document.getElementById('whoSelect');
+  const noProfileHint = document.getElementById('noProfileHint');
+  const avatarPreview = document.getElementById('avatarPreview');
+  const previewNameEl = document.getElementById('previewName');
+  const tabRowEl = document.getElementById('tabRow');
+  const optGridEl = document.getElementById('optGrid');
+  const toastEl = document.getElementById('toast');
+  const coinPillEl = document.getElementById('coinPill');
+
+  const TABS = [
+    { key: 'species', zh: '种类', en: 'Species', kind: 'preview', list: AvatarKit.SPECIES, field: 'species' },
+    { key: 'fur', zh: '毛色', en: 'Fur Color', kind: 'color', list: AvatarKit.FUR_COLORS, field: 'fur' },
+    { key: 'eyes', zh: '眼睛', en: 'Eyes', kind: 'preview', list: AvatarKit.EYES, field: 'eyes' },
+    { key: 'mouth', zh: '嘴巴', en: 'Mouth', kind: 'preview', list: AvatarKit.MOUTHS, field: 'mouth' },
+    { key: 'outfit', zh: '服装', en: 'Outfit', kind: 'preview', list: AvatarKit.OUTFITS, field: 'outfit' },
+    { key: 'outfitColor', zh: '服装颜色', en: 'Outfit Color', kind: 'color', list: AvatarKit.OUTFIT_COLORS, field: 'outfitColor' },
+    { key: 'accessory', zh: '配饰', en: 'Accessory', kind: 'preview', list: AvatarKit.ACCESSORIES, field: 'accessory' },
+  ];
+  let currentTab = TABS[0].key;
+  let currentData = AvatarKit.defaultData();
+  let currentProfileId = null;
+
+  function findMinaShopProfiles(){
+    try{
+      const raw = localStorage.getItem('minaShop.profiles.v1');
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      const order = parsed.order || Object.keys(parsed.profiles || {});
+      return order.map(function(id){ return parsed.profiles[id]; }).filter(Boolean);
+    } catch(e){ return []; }
+  }
+
+  function populateWhoSelect(){
+    const profiles = findMinaShopProfiles();
+    whoSelect.innerHTML = '';
+    if (profiles.length === 0){
+      noProfileHint.classList.remove('hidden');
+      const opt = document.createElement('option');
+      opt.value = 'preview';
+      opt.textContent = '预览小人 Preview Avatar';
+      whoSelect.appendChild(opt);
+      currentProfileId = 'preview';
+    } else {
+      noProfileHint.classList.add('hidden');
+      profiles.forEach(function(p){
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.name;
+        whoSelect.appendChild(opt);
+      });
+      currentProfileId = profiles[0].id;
+    }
+    whoSelect.value = currentProfileId;
+  }
+
+  function loadForCurrentProfile(){
+    currentData = AvatarKit.getAvatarData(currentProfileId);
+    const profiles = findMinaShopProfiles();
+    const p = profiles.find(function(x){ return x.id === currentProfileId; });
+    previewNameEl.textContent = p ? p.name : '预览小人 Preview';
+    renderPreview();
+    renderCoinPill();
+    renderTabs();
+    renderOptions();
+  }
+
+  function renderPreview(){
+    avatarPreview.innerHTML = AvatarKit.renderSVG(currentData);
+  }
+
+  function renderCoinPill(){
+    coinPillEl.textContent = '🪙 ' + AvatarKit.getProfileCoins(currentProfileId);
+  }
+
+  function renderTabs(){
+    tabRowEl.innerHTML = '';
+    TABS.forEach(function(tab){
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tab-btn' + (tab.key === currentTab ? ' active' : '');
+      btn.innerHTML = tab.zh + '<span class="en-label">' + tab.en + '</span>';
+      btn.addEventListener('click', function(){ currentTab = tab.key; renderTabs(); renderOptions(); });
+      tabRowEl.appendChild(btn);
+    });
+  }
+
+  function renderOptions(){
+    const tab = TABS.find(function(t){ return t.key === currentTab; });
+    optGridEl.innerHTML = '';
+    tab.list.forEach(function(item){
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      const picked = currentData[tab.field] === item.id;
+      const owned = AvatarKit.isOwned(currentProfileId, tab.field, tab.list, item.id);
+      const price = AvatarKit.priceOf(tab.list, item.id);
+      cell.className = 'opt-cell' + (picked ? ' picked' : '') + (owned ? '' : ' locked');
+      const priceHtml = owned ? '' : '<div class="opt-price">🔒 ' + price + '</div>';
+      if (tab.kind === 'color'){
+        cell.innerHTML =
+          '<div class="opt-swatch" style="background:' + item.hex + ';"></div>' + priceHtml;
+      } else {
+        const previewData = Object.assign({}, currentData);
+        previewData[tab.field] = item.id;
+        cell.innerHTML =
+          '<div class="opt-thumb">' + AvatarKit.renderSVG(previewData) + '</div>' +
+          '<div class="opt-label">' + item.zh + '</div>' +
+          '<div class="opt-en">' + item.en + '</div>' + priceHtml;
+      }
+      cell.addEventListener('click', function(){
+        if (owned){
+          currentData[tab.field] = item.id;
+          renderPreview();
+          renderOptions();
+          return;
+        }
+        if (currentProfileId === 'preview'){
+          showToast('先在米娜集市新建玩家,再回来解锁 Create a player first');
+          return;
+        }
+        const coins = AvatarKit.getProfileCoins(currentProfileId);
+        if (coins < price){
+          showToast('金币不够啦 Not enough coins 🪙 (' + coins + '/' + price + ')');
+          return;
+        }
+        if (AvatarKit.spendProfileCoins(currentProfileId, price)){
+          AvatarKit.unlockItem(currentProfileId, tab.field, item.id);
+          currentData[tab.field] = item.id;
+          renderCoinPill();
+          renderPreview();
+          renderOptions();
+          showToast('解锁成功 Unlocked: ' + item.zh + ' ' + item.en);
+        }
+      });
+      optGridEl.appendChild(cell);
+    });
+  }
+
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    setTimeout(function(){ toastEl.classList.remove('show'); }, 1800);
+  }
+
+  whoSelect.addEventListener('change', function(){
+    currentProfileId = whoSelect.value;
+    loadForCurrentProfile();
+  });
+  document.getElementById('randomBtn').addEventListener('click', function(){
+    TABS.forEach(function(tab){
+      const pool = tab.list.filter(function(it){ return AvatarKit.isOwned(currentProfileId, tab.field, tab.list, it.id); });
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      currentData[tab.field] = pick.id;
+    });
+    renderPreview();
+    renderOptions();
+  });
+  document.getElementById('saveBtn').addEventListener('click', function(){
+    if (currentProfileId && currentProfileId !== 'preview'){
+      AvatarKit.setAvatarData(currentProfileId, currentData);
+      showToast('已保存!回到游戏里看看吧 Saved!');
+    } else {
+      showToast('先在米娜集市新建玩家,再回来保存 Create a player first');
+    }
+  });
+
+  populateWhoSelect();
+  loadForCurrentProfile();
+})();
+</script>
+</body>
+</html>
